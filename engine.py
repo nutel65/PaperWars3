@@ -36,11 +36,12 @@ class Renderer:
         pygame.display.set_caption("PaperWars")
         self.WINDOW_WIDTH = 640
         self.WINDOW_HEIGHT = 480
-        self.screen = pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        self.screen = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
         self.camera = Camera(0, 0, self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
         self.dirty_rects = []
         self.background = pygame.Surface(self.screen.get_rect().topleft)
-        self.background.fill(0, 128, 0)
+        self.background.fill((0, 128, 0))
+        pygame.display.flip()
         
         # self.draw_queue = utils.DrawQueue()
 
@@ -66,16 +67,15 @@ class Renderer:
 
 class Game:
     def __init__(self):
+        self.entities = []
+        self.command_queue = commands.CommandQueue() # ???
         self.renderer = Renderer()
         self.renderer.camera.set_on_alter_state_command(
             commands.RecalculateEntitiesVisibilityCommand(self))
-        self.entities = []
-        self.command_queue = commands.CommandQueue() # ???
 
     def get_visible_entities(self):
         return [e for e in self.entities if e.visible]
 
-    def start_loop(self):
-        while(True):
-            pass
+    def pump_events(self):
+        pygame.events.pump()
     

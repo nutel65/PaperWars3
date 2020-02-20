@@ -1,4 +1,6 @@
 import engine
 
-game = engine.Game
-game.start_loop()
+game = engine.Game()
+
+while True:
+    game.pump_events()

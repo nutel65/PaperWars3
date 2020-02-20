@@ -22,7 +22,7 @@ class RecalculateEntitiesVisibilityCommand(Command):
     def __init__(self, game):
         self.game = game
         rect = game.renderer.camera.get_rect()
-        self.indices = self.rect.collidelistall(game.entities)
+        self.indices = rect.collidelistall(game.entities)
 
     def execute(self):
         for i in range(len(self.game.entities)):
