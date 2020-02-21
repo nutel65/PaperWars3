@@ -59,6 +59,24 @@ class DotDict(dict):
     __setattr__ = dict.__setitem__
     __delattr__ = dict.__delitem__
 
+
+class Layer(list):
+    """object on lower ordered layers are drawn first eg. 1 > 2 > 3 """
+    order_list = []
+    add = list.append
+
+    def __init__(self, order, *args, **kwargs):
+    
+        super().__init__(*args, **kwargs)
+        if order in self.order_list:
+            raise ValueError("'order' value already used")
+        else:
+            self.order_list.append(order)
+            self.order = order
+        
+
+
+
 def wrap_func(func, *args, **kwargs):
     def wrapper():
         return func(*args, **kwargs)

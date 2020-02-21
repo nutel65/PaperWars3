@@ -1,16 +1,16 @@
 import utils
 import collections
 
-class CommandQueue:
-    def __init__(self):
-        self._queue = collections.deque()
+# class CommandQueue:
+#     def __init__(self):
+#         self._queue = collections.deque()
 
-    def add(self, command):
-        self._queue.append(command)
+#     def add(self, command):
+#         self._queue.append(command)
 
-    def execute_commands(self):
-        while self._queue:
-            self._queue.popleft().execute()
+#     def execute_commands(self):
+#         while self._queue:
+#             self._queue.popleft().execute()
 
 
 class Command:
@@ -21,15 +21,14 @@ class Command:
 class RecalculateEntitiesVisibilityCommand(Command):
     def __init__(self, game):
         self.game = game
-        rect = game.renderer.camera.get_rect()
-        self.indices = rect.collidelistall(game.entities)
+        self.rect = game.renderer.camera.get_rect()
 
     def execute(self):
-        for i in range(len(self.game.entities)):
-            if i in self.indices:
-                self.game.entities[i].visible = True
-            else:
-                self.game.entities[i].visible = False
+        self.game.renderer.visible_entities.empty()
+        for ent in self.game.entities:
+            if self.rect.colliderect(ent.rect):
+                self.game.renderer.visible_entities.add(ent)
+                
 
 class EntityMoveCommand(Command): ...
 
