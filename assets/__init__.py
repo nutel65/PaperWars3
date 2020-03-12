@@ -1,5 +1,7 @@
 import pygame
 
+""" This file loads sounds, images and other assets """
+
 TILEMAP_TEXTURES = {
     # 0: pygame.image.load("textures/water.png").convert_alpha(),
     # 1: pygame.image.load("textures/grass.png").convert(),
