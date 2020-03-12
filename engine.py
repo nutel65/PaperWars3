@@ -1,5 +1,5 @@
 import pygame
-import entities
+import game_objects
 import commands
 import collections
 import utils
@@ -40,10 +40,10 @@ class Renderer:
 
         self.screen = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
         self.camera = Camera(0, 0, self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
-        self.dirty_rects = []
-        self.render_list = []
+        self.render_queue = []
         self.visible_entities = {}
         self.layers = {}
+        self.dirty_rects = []
 
         self.background = pygame.Surface(self.screen.get_rect().size)
         self.background.fill((0, 128, 0))
@@ -92,11 +92,11 @@ class Renderer:
         print("---- UPDATE ----")
 
         # sort render list by layer
-        self.render_list.sort(key=self.get_entity_layer, reverse=True)
+        self.render_queue.sort(key=self.get_entity_layer, reverse=True)
 
         # draw each element in render list
-        while self.render_list:
-            self.draw(self.render_list.pop())
+        while self.render_queue:
+            self.draw(self.render_queue.pop())
 
         # update dirty rects
         pygame.display.update(self.dirty_rects)
@@ -123,10 +123,10 @@ class Game:
     def pump_events(self):
         pygame.event.pump()
 
-    def add_entity(self, entity_type, layer_name, *args, **kwargs):
+    def add_entity(self, entity_type, *args, **kwargs):
         if entity_type == "soldier":
-            ent = entities.Soldier(*args, **kwargs)
+            ent = game_objects.Soldier(*args, **kwargs)
 
         self.entities.add(ent)
-        self.renderer.layers[layer_name].add(ent)
-        self.renderer.render_list.append(ent)
+        self.renderer.layers[ent.RENDER_PRIORITY].add(ent)
+        self.renderer.render_queue.append(ent)
