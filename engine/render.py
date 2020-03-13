@@ -1,5 +1,7 @@
 import pygame
 import os
+import functools
+import assets
 
 class Renderer:
     """Provides methods for rendering entities to screen.
@@ -97,6 +99,7 @@ class Renderer:
 
 class Camera:
     """Alters field of view. Allows to zoom in, zoom out, and move camera."""
+
     def __init__(self, camera_x, camera_y, view_width, view_height, output_width=None, output_height=None):
         self._zoom = 1.0
         self._camera_x = camera_x
@@ -121,3 +124,27 @@ class Camera:
 
     def translate_rect(rect):
         ...
+
+
+class TilemapRenderer():
+    def __init__(self, tilemap_array):
+        self._tilemap_array = tilemap_array
+
+
+    @functools.lru_cache
+    def render_full(self, scale=1.0):
+        height, width = self._tilemap_array.shape
+        result_surface = pygame.Surface((width * 32 * scale, height * 32 * scale))
+        texture_surface_template = pygame.Surface((32 * scale, 32 * scale))
+        for i in range(height):
+            for n_row, item_code in enumerate(array[i]):
+                texture = assets.TILEMAP_TEXTURES.get(item_code, assets.TILEMAP_TEXTURES["default"])
+                scaled_texture = pygame.transform.scale(texture, texture_surface_template)
+                new_surface.blit() (n_row * 32, i * 32) # blit scaled_texture to this
+        return new_surface
+    
+    def render_area(self, rect):
+        ...
+
+
+

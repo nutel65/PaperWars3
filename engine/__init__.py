@@ -1,7 +1,7 @@
 """This file imports main engine class 'Game'"""
 import pygame
 from engine import game_socket
-from engine import renderer
+from engine import render
 from src import state
 from src import entities
 
@@ -10,7 +10,7 @@ class Game:
 
     variables:
         entities    List of all entities.
-        renderer    Provides method to represent game's state graphically
+        render    Provides method to represent game's state graphically
         state       Container for all usefull information about game state
 
     methods:
@@ -22,7 +22,7 @@ class Game:
     def __init__(self):
         self.state = state.GameState(self)
         self.entities = set()
-        self.renderer = renderer.Renderer()
+        self.renderer = render.Renderer()
         self.socket = None
 
     def pump_events(self):
@@ -37,5 +37,5 @@ class Game:
 
     def reset(self):
         self.entities.clear()
-        self.renderer.camera = renderer.Camera()
+        self.renderer.camera = render.Camera()
         self.state = state.GameState(self)
