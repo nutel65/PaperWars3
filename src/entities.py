@@ -1,3 +1,5 @@
+import assets
+
 class Entity():
     """Represents any game object"""
     def __init__(self, *args, **kwargs):
@@ -13,7 +15,7 @@ class Drawable(Entity):
         self.rect = None # pygame.Rect
         self.image = None # pygame.Surface
         self.RENDER_PRIORITY = -1 # -1 = always on top
-        
+
 
 class Soldier(Drawable):
     def __init__(self, pos, image):
@@ -25,5 +27,5 @@ class Soldier(Drawable):
     def get_pos_px(self):
         return self.rect.topleft
 
-    def set_pos_px(self, x, y)
+    def set_pos_px(self, x, y):
         self.rect.topleft = (x, y)

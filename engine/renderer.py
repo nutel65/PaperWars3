@@ -1,4 +1,5 @@
 import pygame
+import os
 
 class Renderer:
     """Provides methods for rendering entities to screen.
@@ -7,10 +8,9 @@ class Renderer:
         draw(Drawable) -> None
         clear(Drawable) -> None
         update() -> None
-
     """
-    def __init__(self, game):
-        self.game = game
+    
+    def __init__(self):
 
         os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (650, 30)
         pygame.init()
@@ -19,6 +19,7 @@ class Renderer:
         self.WINDOW_WIDTH = 640
         self.WINDOW_HEIGHT = 480
         self.screen = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
+        print("[Info]: Pygame display initialized")
         self.camera = Camera(0, 0, self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
 
         # append directly here in order render object
@@ -27,7 +28,6 @@ class Renderer:
         # holds pieces of screen to be updated
         self.dirty_rects = []
 
-        # self.layers = {}
         # setup and draw black background
         self.background = pygame.Surface(self.screen.get_rect().size)
         self.background.fill((0, 128, 0))
@@ -65,14 +65,6 @@ class Renderer:
         screen_x = entity.rect.topleft[0] - self.camera.get_rect().topleft[0]
         screen_y = entity.rect.topleft[1] - self.camera.get_rect().topleft[1]
 
-        # search for overlapping entities
-        # overlapping = []
-        # for _, layer in self.layers:
-        #     for e in layer:
-        #         if entity.rect.colliderect(e.rect) and e != entity:
-        #             overlapping.append(e)
-        
-
         self.screen.blit(self.background, (screen_x, screen_y), entity.rect) # area param?
         self.dirty_rects.append(entity.rect)
 
@@ -80,16 +72,18 @@ class Renderer:
         """Processes render_request_list and dirty_rects.
         Call this at the end of main loop.
         """ 
-        print("---- UPDATE ----")
-
         # sort render_request_list to preserve proper order of rendering
         self.render_request_list.sort(key=lambda x: x.RENDER_PRIORITY, reverse=True)
 
-        # redraw each element in render list and then remove them from to-render list
+        # redraw each element in render list and then remove them from that list
+        counter = 0
         while self.render_request_list:
-            ent = render_request_list.pop()
-            self.clear(self.ent)
-            self.draw(self.ent)
+            ent = self.render_request_list.pop()
+            self.clear(ent)
+            self.draw(ent)
+            counter += 1
+        if counter > 0:
+            print(f"[Info]: Rendered {counter} objects")
 
         # update dirty rects
         pygame.display.update(self.dirty_rects)
@@ -103,25 +97,27 @@ class Renderer:
 
 class Camera:
     """Alters field of view. Allows to zoom in, zoom out, and move camera."""
-    def __init__(self, x, y, width, height):
-        self._x = x
-        self._y = y
+    def __init__(self, camera_x, camera_y, view_width, view_height, output_width=None, output_height=None):
         self._zoom = 1.0
-        self._width = width
-        self._height = height
+        self._camera_x = camera_x
+        self._camera_y = camera_y
+        self._view_width = view_width
+        self._view_height = view_height
+        self._output_width = output_width
+        self._output_height = output_height
 
     def get_rect(self):
-        return pygame.Rect(self._x, self._y, self._width, self._height)
+        return pygame.Rect(self._camera_x, self._camera_y, self._view_width, self._view_height)
 
     def move(self, vector):
         # todo: use pygame.vector2 for vector variable
         ...
-    
-    # def set_on_alter_state_command(self, command):
-    #     self._on_alter_state_command = command
 
     def zoom_in(self):
         ...
 
     def zoom_out(self):
+        ...
+
+    def translate_rect(rect):
         ...

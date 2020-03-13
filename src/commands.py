@@ -1,7 +1,11 @@
 """API to access specific tasks as a comand (eg. bound action to button)."""
 
 class Command:
-    """Command abstraction"""
+    """Command pattern abstraction."""
+
+    def __init__(self, game):
+        self.game = game
+
     def execute(self):
         raise NotImplementedError
 
@@ -19,17 +23,17 @@ class Command:
                 
 
 class EntityMoveCommand(Command):
-    def __init__(self, game, obj, dest_px):
-        self.game = game
-        self.dest_px = dest_px
-        self.obj = obj
+    """Moves entity to destination px."""
 
-    def execute(self):
-        # change object state
-        self.obj.set_pos_px(self.dest_px)
+    def execute(self, ent, dest_px):
+        # change entity state
+        ent.set_pos_px(dest_px)
         # lastly, request rendering of object
-        self.game.renderer.render_request_list.append(self.obj)
+        self.game.renderer.render_request_list.append(ent)
 
 
-class EntityAttackCommand(Command): ...
+class EntityAttackCommand(Command):
+    """Causes entity to attack other entity."""
 
+    def execute(self, ent, dest_ent):
+        
