@@ -5,15 +5,9 @@ import sys
 import os
 import pygame
 import numpy
+import functools
+from src import entities
 from pygame.locals import QUIT, KEYDOWN, K_ESCAPE
-
-
-def exit_check(event):
-    if event.type == QUIT:
-        return True
-    if event.type == KEYDOWN:
-        if event.key == K_ESCAPE:
-            return True
 
 
 def index_to_px(index, shift=(0, 0)):
@@ -57,7 +51,7 @@ class TilemapFileParser():
         self._filename = filename
 
     def parse(self):
-        """Parses and returns result as numpy.array"""
+        """Parses and returns result as numpy.array of ints"""
         result = []
         with open(self._filename) as tilemap:
             for line in tilemap.read().splitlines():
@@ -67,3 +61,9 @@ class TilemapFileParser():
                 mapped = list(map(int, stripped_line.split(",")))
                 result.append(mapped)
         return numpy.array(result)
+
+
+@functools.lru_cache()
+def scale_image(image, scale=1):
+    ts = int(32 * scale)
+    return pygame.transform.scale(image, (ts, ts))
