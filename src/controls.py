@@ -30,7 +30,7 @@ class EventHandler():
             self._handle_keydown(event)
 
     def _handle_keydown(self, event):
-        if event.key == pygame.K_PLUS:
+        if event.key == pygame.K_EQUALS:
             self.zoom_in.execute()
         if event.key == pygame.K_MINUS:
             self.zoom_out.execute()

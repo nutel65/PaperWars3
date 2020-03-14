@@ -36,10 +36,7 @@ class Renderer:
         # holds pieces of screen to be updated
         self.dirty_rects = []
         # draw green background
-        self.background = pygame.Surface(self.screen.get_rect().size)
-        self.background.fill((0, 128, 0))
-        self.screen.blit(self.background, (0, 0), self.camera.rect)
-        pygame.display.flip()
+        
 
         array = utils.TilemapFileParser("assets/maps/test.tm").parse()
         self._tmr = TilemapRenderer(array)
@@ -49,8 +46,8 @@ class Renderer:
 
     def _draw(self, entity):
         """Render single entity (call its draw() method)"""
-        screen_x = entity.rect.topleft[0] - self.camera.rect().topleft[0]
-        screen_y = entity.rect.topleft[1] - self.camera.rect().topleft[1]
+        screen_x = entity.rect.topleft[0] - self.camera.rect.topleft[0]
+        screen_y = entity.rect.topleft[1] - self.camera.rect.topleft[1]
         # # additional clear if object's image is transparent (to prevent overlapping).
         # if entity.image.get_alpha() is not None:
         #     self._clear(entity)
@@ -60,8 +57,8 @@ class Renderer:
     
     def _clear(self, entity):
         """Draw background over current object's position"""
-        screen_x = entity.rect.topleft[0] - self.camera.rect().topleft[0]
-        screen_y = entity.rect.topleft[1] - self.camera.rect().topleft[1]
+        screen_x = entity.rect.topleft[0] - self.camera.rect.topleft[0]
+        screen_y = entity.rect.topleft[1] - self.camera.rect.topleft[1]
 
         self.screen.blit(self.background, (screen_x, screen_y), entity.rect)
         self.dirty_rects.append(entity.rect)
@@ -90,6 +87,10 @@ class Renderer:
         self.render_request_list.extend(iterable)
 
     def update_tilemap(self):
+        self.background = pygame.Surface(self.screen.get_rect().size)
+        self.background.fill((0, 128, 0))
+        self.screen.blit(self.background, self.camera.rect.topleft, self.camera.rect)
+        
         self.background = self._tmr.render_full(scale=self.camera._zoom)
         self.screen.blit(self.background, self.camera.rect.topleft, self.camera.rect)
         pygame.display.flip()

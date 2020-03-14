@@ -39,15 +39,20 @@ class ExitGameCommand(Command):
 
 class CameraZoomInCommand(Command):
     def execute(self):
-        self.game.render.camera._zoom += 0.2
+        self.game.renderer.camera._zoom += 0.2
+        self.game.renderer.update_tilemap()
+        self.game.renderer.enqueue_all(self.game.entities)
 
 
 class CameraZoomOutCommand(Command):
     def execute(self):
-        self.game.render.camera._zoom -= 0.2
+        self.game.renderer.camera._zoom -= 0.2
+        self.game.renderer.update_tilemap()
+        self.game.renderer.enqueue_all(self.game.entities)
 
 
 class CameraMoveCommand(Command):
+    # FIXME: Not working properly
     def __init__(self, game_obj, direction, scalar=100):
         self.game = game_obj
         self.direction = direction
@@ -63,7 +68,7 @@ class CameraMoveCommand(Command):
             x += self.scalar
         if self.direction == "left":
             x -= self.scalar
-        self.game.renderer.camera.move(x, y)
+        self.game.renderer.camera.move((x, y))
         self.game.renderer.update_tilemap()
         self.game.renderer.enqueue_all(self.game.entities)
 
