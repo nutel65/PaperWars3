@@ -21,10 +21,10 @@ class EventHandler():
         self.zoom_in = commands.CameraZoomCommand(game, 2.0)
         self.zoom_out = commands.CameraZoomCommand(game, 0.5)
         self.reset_zoom = commands.CameraZoomCommand(game, 1.0)
-        self.camera_left = commands.CameraMoveCommand(game, "left")
-        self.camera_right = commands.CameraMoveCommand(game, "right")
-        self.camera_up = commands.CameraMoveCommand(game, "up")
-        self.camera_down = commands.CameraMoveCommand(game, "down")
+        self.camera_left = commands.CameraMoveCommand(game, "left", 50)
+        self.camera_right = commands.CameraMoveCommand(game, "right", 50)
+        self.camera_up = commands.CameraMoveCommand(game, "up", 50)
+        self.camera_down = commands.CameraMoveCommand(game, "down", 50)
 
     def handle(self, event):
         if event.type == pygame.KEYDOWN:

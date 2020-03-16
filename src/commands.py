@@ -1,4 +1,4 @@
-"""API to access specific tasks as a comand (eg. bound action to button)."""
+"""API to access specific game tasks accesible for user as a command."""
 import sys
 
 class Command:
@@ -50,8 +50,7 @@ class CameraZoomCommand(Command):
 
 
 class CameraMoveCommand(Command):
-    # FIXME: Not working properly
-    def __init__(self, game_obj, direction, scalar=100):
+    def __init__(self, game_obj, direction, scalar):
         self.game = game_obj
         self.direction = direction
         self.scalar = scalar
