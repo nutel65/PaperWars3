@@ -14,9 +14,7 @@ class Command:
 class EntityMoveCommand(Command):
     """Moves entity to destination px."""
     def execute(self, ent, dest_px):
-        # change entity state
         ent.set_pos_px(dest_px)
-        # lastly, request rendering of object
         self.game.renderer.render_request_list.append(ent)
 
 

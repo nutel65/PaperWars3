@@ -38,9 +38,13 @@ class Camera(Entity):
 class Drawable(Entity):
     """Represents object that can be drawn"""
     def __init__(self, *args, **kwargs):
+        raise NotImplementedError
         self.image = None # pygame.Surface
         self.rect = None # pygame.Rect
-        self.RENDER_PRIORITY = None # int
+        self.RENDER_PRIORITY = 1 # int
+        # SCREEN_STATIC has precedence over MAP_STATIC
+        self.MAP_STATIC = False # if true object behaves like part of map while rendering
+        self.SCREEN_STATIC = False # determines whether object moves along with camera
 
     def draw(self, dest_surf, pos_px, area=None):
         """Intended to be called from renderer.
@@ -55,6 +59,8 @@ class Soldier(Drawable):
         self.rect = self.image.get_rect()
         self.rect.topleft = pos_px
         self.RENDER_PRIORITY = 2
+        self.MAP_STATIC = True
+        self.SCREEN_STATIC = False
 
     def get_pos_px(self):
         return self.rect.topleft

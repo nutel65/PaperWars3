@@ -31,8 +31,8 @@ class Renderer:
 
         self.WINDOW_WIDTH = 640
         self.WINDOW_HEIGHT = 480
-        # self.DISPLAY_RECT = pygame.Rect(50, 50, self.WINDOW_WIDTH - 100, self.WINDOW_HEIGHT - 100)
-        self.DISPLAY_RECT = pygame.Rect(0, 0, self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
+        self.DISPLAY_RECT = pygame.Rect(50, 50, self.WINDOW_WIDTH - 100, self.WINDOW_HEIGHT - 100)
+        # self.DISPLAY_RECT = pygame.Rect(0, 0, self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
 
         self.screen = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
         utils.log("Pygame display initialized")
@@ -47,13 +47,26 @@ class Renderer:
         return (self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
 
     def get_entity_screen_rect(self, ent):
-        screen_x = ent.rect.topleft[0] - self.camera.rect.topleft[0]
-        screen_y = ent.rect.topleft[1] - self.camera.rect.topleft[1]
+        if ent.SCREEN_STATIC:
+            print("static entity")
+            return ent.rect
+        screen_x = (ent.rect.topleft[0] - self.camera.rect.topleft[0]) + self.DISPLAY_RECT.x
+        screen_y = (ent.rect.topleft[1] - self.camera.rect.topleft[1]) + self.DISPLAY_RECT.y
         width, height = ent.rect.size
         return pygame.Rect(screen_x, screen_y, width, height)
 
+    def _is_valid_request(self, ent):
+        """Returns True if entity is located in its draw area."""
+        ent_screen_rect = self.get_entity_screen_rect(ent)
+        if ent.MAP_STATIC:
+            if ent_screen_rect.colliderect(self.DISPLAY_RECT):
+                return True
+        elif ent_screen_rect.colliderect(self.screen.get_rect()):
+            return True
+        return False
+
     def _draw(self, entity):
-        """Render single entity (call its draw() method)"""
+        """Render single entity (call its draw() method)."""
         ent_screen_rect = self.get_entity_screen_rect(entity)
         print(f"old topleft: {entity.rect.topleft}, new: {ent_screen_rect.topleft}")
         # # additional clear if object's image is transparent (to prevent overlapping).
@@ -64,7 +77,7 @@ class Renderer:
         self.dirty_rects.append(ent_screen_rect)
     
     def _clear(self, entity):
-        """Draw background over current object's position"""
+        """Draw background over current object's position."""
         ent_screen_rect = self.get_entity_screen_rect(entity)
         self.screen.blit(self.background, ent_screen_rect, ent_screen_rect)
         self.dirty_rects.append(ent_screen_rect)
@@ -73,11 +86,14 @@ class Renderer:
         """Processes render_request_list and dirty_rects.
         Call this at the end of main loop.
         """ 
+        # If ent.MAP_STATIC, then filter out requests which are completely out of self.DISPLAY_RECT
+        # else just filter out those that are completely out of self.screen.rect
+        self.render_request_list = list(filter(self._is_valid_request, self.render_request_list))
+
         # sort render_request_list to preserve proper order of rendering
         self.render_request_list.sort(key=lambda x: x.RENDER_PRIORITY, reverse=True)
         # redraw each element in render list and then remove them from that list
         counter = 0
-        # print(self.render_request_list)
         while self.render_request_list:
             ent = self.render_request_list.pop()
             self._clear(ent)
