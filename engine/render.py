@@ -67,6 +67,7 @@ class Renderer:
 
     def _draw(self, entity):
         """Render single entity (call its draw() method)."""
+        # TODO: Draw parially entities that are parially out of self.DISPLAY_RECT
         ent_screen_rect = self.get_entity_screen_rect(entity)
         print(f"old topleft: {entity.rect.topleft}, new: {ent_screen_rect.topleft}")
         # # additional clear if object's image is transparent (to prevent overlapping).
