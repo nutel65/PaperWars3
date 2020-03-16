@@ -9,3 +9,4 @@ game = engine.Game()
 assets.load_all()
 
 singleplayer.run(game)
+# game.reset()

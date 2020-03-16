@@ -1,7 +1,8 @@
 """This file imports main engine class 'Game'"""
 import pygame
 from engine import game_socket
-from engine import renderer
+from engine import render
+from src import commands
 from src import state
 from src import entities
 
@@ -10,32 +11,30 @@ class Game:
 
     variables:
         entities    List of all entities.
-        renderer    Provides method to represent game's state graphically
-        state       Container for all usefull information about game state
+        renderer    Represents game state graphically.
+        state       Aggregation for all usefull information about game state.
 
     methods:
-        pump_events()   Called every frame to prevent Windows
-                        from "program stopped working" message.
-        add_entity()    Easy and convenient way to add new entities.
+        add()       Easy and convenient way to add new entities.
+        reset()     Resets state of game to default settings 
     """
     
     def __init__(self):
         self.state = state.GameState(self)
         self.entities = set()
-        self.renderer = renderer.Renderer()
+        self.renderer = render.Renderer()
         self.socket = None
 
-    def pump_events(self):
-        pygame.event.pump()
-
-    def add_entity(self, entity_type, *args, **kwargs):
+    def add(self, entity_type, *args, **kwargs):
+        """Easy and convenient way to add new entities."""
         if entity_type == "soldier":
             ent = entities.Soldier(*args, **kwargs)
-
+        elif entity_type == "button":
+            raise NotImplementedError
+        else:
+            raise ValueError(f"Entity type {entity_type} does not exist.")
         self.entities.add(ent)
         self.renderer.render_request_list.append(ent)
 
-    def reset(self):
-        self.entities.clear()
-        self.renderer.camera = renderer.Camera()
-        self.state = state.GameState(self)
+    def reset():
+        commands.ResetGameCommand(self).execute()

@@ -3,3 +3,4 @@
 __pycache__
 .vscode
 test2.py
+.pytest_cache

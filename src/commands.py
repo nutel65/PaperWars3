@@ -1,30 +1,17 @@
-"""API to access specific tasks as a comand (eg. bound action to button)."""
+"""API to access specific game tasks accesible for user as a command."""
+import sys
 
 class Command:
     """Command pattern abstraction."""
-
-    def __init__(self, game):
-        self.game = game
+    def __init__(self, game_obj):
+        self.game = game_obj
 
     def execute(self):
         raise NotImplementedError
 
 
-# class RecalculateEntitiesVisibilityCommand(Command):
-#     def __init__(self, game):
-#         self.game = game
-#         self.rect = game.renderer.camera.get_rect()
-
-#     def execute(self):
-#         self.game.renderer.visible_entities.empty()
-#         for ent in self.game.entities:
-#             if self.rect.colliderect(ent.rect):
-#                 self.game.renderer.visible_entities.add(ent)
-                
-
 class EntityMoveCommand(Command):
     """Moves entity to destination px."""
-
     def execute(self, ent, dest_px):
         # change entity state
         ent.set_pos_px(dest_px)
@@ -34,6 +21,57 @@ class EntityMoveCommand(Command):
 
 class EntityAttackCommand(Command):
     """Causes entity to attack other entity."""
-
     def execute(self, ent, dest_ent):
-        
+        raise NotImplementedError
+
+
+class ResetGameCommand(Command):
+    def execute(self):
+        self.game.entities.clear()
+        self.game.renderer.camera = render.Camera()
+        self.self.state = state.GameState(self)
+
+
+class ExitGameCommand(Command):
+    def execute(self):
+        sys.exit(0)
+
+
+class CameraZoomCommand(Command):
+    def __init__(self, game_obj, zoom=1.0):
+        self.game = game_obj
+        self.zoom = float(zoom)
+
+    def execute(self):
+        self.game.renderer.camera.set_zoom(self.zoom)
+        self.game.renderer.update_tilemap()
+        self.game.renderer.enqueue_all(self.game.entities)
+        print("new cam pos", self.game.renderer.camera.rect)
+
+
+class CameraMoveCommand(Command):
+    def __init__(self, game_obj, direction, scalar):
+        self.game = game_obj
+        self.direction = direction
+        self.scalar = scalar
+
+    def execute(self):
+        x, y = self.game.renderer.camera.rect.topleft
+        if self.direction == "up":
+            y -= self.scalar
+        elif self.direction == "down":
+            y += self.scalar
+        elif self.direction == "right":
+            x += self.scalar
+        elif self.direction == "left":
+            x -= self.scalar
+        else:
+            raise NotImplementedError(f"{self.direction} not implemented")
+        self.game.renderer.camera.move((x, y))
+        self.game.renderer.update_tilemap()
+        self.game.renderer.enqueue_all(self.game.entities)
+        print("new cam pos", self.game.renderer.camera.rect)
+
+
+class PauseGameCommand(Command):
+    pass

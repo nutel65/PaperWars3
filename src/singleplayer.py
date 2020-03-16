@@ -1,15 +1,19 @@
-"""All action for single player in game happens here"""
+"""All action for single player game happens here."""
 import assets
+import pygame
 from src import utils
+from src import controls
 
 def run(game):
-    game.add_entity("soldier", (50, 50), image="green_square")
-    game.add_entity("soldier", (100, 100), image="blue_square")
-    game.add_entity("soldier", (150, 150), image="red_square")
+    event_handler = controls.EventHandler(game)
+    game.renderer.update_tilemap()
+    game.add("soldier", (50, 50), image="green_square")
+    game.add("soldier", (100, 100), image="blue_square")
+    game.add("soldier", (150, 150), image="red_square")
 
     done = False
     while not done:
-        game.pump_events()
+        for event in pygame.event.get():
+            done = controls.exit_check(event)
+            event_handler.handle(event)
         game.renderer.update()
-        utils.exit_check()
-    game.reset()
