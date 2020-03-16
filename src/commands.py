@@ -37,18 +37,16 @@ class ExitGameCommand(Command):
         sys.exit(0)
 
 
-class CameraZoomInCommand(Command):
+class CameraZoomCommand(Command):
+    def __init__(self, game_obj, zoom=1.0):
+        self.game = game_obj
+        self.zoom = float(zoom)
+
     def execute(self):
-        self.game.renderer.camera._zoom += 0.2
+        self.game.renderer.camera.set_zoom(self.zoom)
         self.game.renderer.update_tilemap()
         self.game.renderer.enqueue_all(self.game.entities)
-
-
-class CameraZoomOutCommand(Command):
-    def execute(self):
-        self.game.renderer.camera._zoom -= 0.2
-        self.game.renderer.update_tilemap()
-        self.game.renderer.enqueue_all(self.game.entities)
+        print("new cam pos", self.game.renderer.camera.rect)
 
 
 class CameraMoveCommand(Command):
@@ -62,15 +60,18 @@ class CameraMoveCommand(Command):
         x, y = self.game.renderer.camera.rect.topleft
         if self.direction == "up":
             y -= self.scalar
-        if self.direction == "down":
+        elif self.direction == "down":
             y += self.scalar
-        if self.direction == "right":
+        elif self.direction == "right":
             x += self.scalar
-        if self.direction == "left":
+        elif self.direction == "left":
             x -= self.scalar
+        else:
+            raise NotImplementedError(f"{self.direction} not implemented")
         self.game.renderer.camera.move((x, y))
         self.game.renderer.update_tilemap()
         self.game.renderer.enqueue_all(self.game.entities)
+        print("new cam pos", self.game.renderer.camera.rect)
 
 
 class PauseGameCommand(Command):

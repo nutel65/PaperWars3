@@ -18,8 +18,9 @@ class EventHandler():
     def __init__(self, game):
         self.game = game
         self.exit_game = commands.ExitGameCommand(game)
-        self.zoom_in = commands.CameraZoomInCommand(game)
-        self.zoom_out = commands.CameraZoomOutCommand(game)
+        self.zoom_in = commands.CameraZoomCommand(game, 2.0)
+        self.zoom_out = commands.CameraZoomCommand(game, 0.5)
+        self.reset_zoom = commands.CameraZoomCommand(game, 1.0)
         self.camera_left = commands.CameraMoveCommand(game, "left")
         self.camera_right = commands.CameraMoveCommand(game, "right")
         self.camera_up = commands.CameraMoveCommand(game, "up")
@@ -34,6 +35,8 @@ class EventHandler():
             self.zoom_in.execute()
         if event.key == pygame.K_MINUS:
             self.zoom_out.execute()
+        if event.key == pygame.K_0:
+            self.reset_zoom.execute()
         if event.key == pygame.K_LEFT:
             self.camera_left.execute()
         if event.key == pygame.K_RIGHT:
