@@ -67,13 +67,11 @@ class CameraMoveCommand(Command):
         elif self.direction == "left":
             x -= self.scalar
         else:
-            raise NotImplementedError(f"{self.direction} not implemented")
+            raise NotImplementedError(f"'{self.direction}' direction not implemented")
         self.game.renderer.camera.move((x, y))
         self.game.renderer.update_tilemap()
         self.game.renderer.enqueue_all(self.game.entities)
         utils.log(f"Camera MOVE: {self.game.renderer.camera}")
-
-
 
 
 class PauseGameCommand(Command):

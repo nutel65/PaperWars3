@@ -7,8 +7,8 @@ from src import controls
 def run(game):
     event_handler = controls.EventHandler(game)
     game.renderer.update_tilemap()
-    game.add("soldier", (50, 50), image="green_square")
-    game.add("soldier", (100, 100), image="blue_square")
+    # game.add("soldier", (32, 32), image="green_square")
+    # game.add("soldier", (320, 320), image="blue_square")
     game.add("soldier", (150, 150), image="red_square")
 
     done = False
