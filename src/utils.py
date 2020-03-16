@@ -6,6 +6,7 @@ import os
 import pygame
 import numpy
 import functools
+from datetime import datetime
 from src import entities
 from pygame.locals import QUIT, KEYDOWN, K_ESCAPE
 
@@ -67,3 +68,10 @@ class TilemapFileParser():
 def scale_image(image, scale=1):
     ts = int(32 * scale)
     return pygame.transform.scale(image, (ts, ts))
+
+
+def log(msg="", type="Info", time=True, output=print):
+    t = ""
+    if time:
+        t = datetime.now().strftime("%H:%M:%S:%f")[:-3]
+    output(f"[{type}]:({t}): {msg}")

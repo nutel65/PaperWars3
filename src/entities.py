@@ -43,7 +43,9 @@ class Drawable(Entity):
         self.RENDER_PRIORITY = None # int
 
     def draw(self, dest_surf, pos_px, area=None):
-        """Intended to be called from renderer."""
+        """Intended to be called from renderer.
+        Override this method for custom drawing behaviour.
+        """
         dest_surf.blit(self.image, pos_px, area)
 
 

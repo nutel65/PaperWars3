@@ -33,7 +33,8 @@ class Renderer:
         self.WINDOW_HEIGHT = 480
         self.DISPLAY_RECT = pygame.Rect(50, 50, self.WINDOW_WIDTH - 100, self.WINDOW_HEIGHT - 100)
         self.screen = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
-        print("[Info]: Pygame display initialized")
+        utils.log("Pygame display initialized")
+
 
         assets.load_textures()
         # array = utils.TilemapFileParser("assets/maps/test.tm").parse()
@@ -77,7 +78,9 @@ class Renderer:
             self._draw(ent)
             counter += 1
         if counter > 0:
-            print(f"[Info]: Rendered total {counter} objects")
+            utils.log(f"RENDERER: Rendered total {counter} objects")
+
+            
         # update dirty rects
         pygame.display.update(self.dirty_rects)
         self.dirty_rects.clear()
@@ -94,6 +97,8 @@ class Renderer:
         self.background = self._tmr.render_full(scale=self.camera._zoom)
         self.screen.blit(self.background, self.DISPLAY_RECT, tmprect)
         pygame.display.flip()
+        utils.log("RENDERER: Rendered tilemap")
+
 
 
 class TilemapRenderer():

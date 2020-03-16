@@ -9,6 +9,7 @@ constants:
     ICONS
 """
 import pygame
+from src import utils
 
 TILEMAP_TEXTURES = None
 SPRITES = None
@@ -37,7 +38,7 @@ def load_textures():
         5: pygame.image.load("assets/images/textures/snow.png").convert(),
         6: pygame.image.load("assets/images/textures/water.png").convert(),
     }
-    print("[Info]: assets.TILEMAP_TEXTURES initialized")
+    utils.log("assets.TILEMAP_TEXTURES initialized")
 
 
 def load_sprites():
@@ -59,7 +60,7 @@ def load_sprites():
         "red_soldier": pygame.image.load("assets/images/sprites/red_soldier32.png").convert_alpha(),
         "purple_soldier": pygame.image.load("assets/images/sprites/purple_soldier32.png").convert_alpha(),
     }
-    print("[Info]: assets.SPRITES initialized")
+    utils.log("assets.SPRITES initialized")
 
 
 def load_icons():
@@ -69,7 +70,7 @@ def load_icons():
         "crossed_arrows": pygame.image.load("assets/images/icons/move.png").convert_alpha(),
         "red_sword": pygame.image.load("assets/images/icons/sword2.png").convert_alpha(),
     }
-    print("[Info]: assets.ICONS initialized")
+    utils.log("assets.ICONS initialized")
 
 
 def load_ui_elements():
@@ -77,7 +78,7 @@ def load_ui_elements():
     UI_ELEMENTS = {
         "hl_tile": pygame.image.load("assets/images/ui_elements/htwhite32.png").convert_alpha(),
     }
-    print("[Info]: assets.UI_ELEMENTS initialized")
+    utils.log("assets.UI_ELEMENTS initialized")
 
 
 def load_sounds():
@@ -87,5 +88,5 @@ def load_sounds():
     FX_SOUNDS = {}
     
     SOUNDTRACKS = {}
-    print("[Info]: assets.FX_SOUNDS initialized")
-    print("[Info]: assets.SOUNDTRACKS initialized")
+    utils.log("assets.FX_SOUNDS initialized")
+    utils.log("assets.SOUNDTRACKS initialized")

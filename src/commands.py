@@ -1,5 +1,6 @@
 """API to access specific game tasks accesible for user as a command."""
 import sys
+from src import utils
 
 class Command:
     """Command pattern abstraction."""
@@ -46,7 +47,7 @@ class CameraZoomCommand(Command):
         self.game.renderer.camera.set_zoom(self.zoom)
         self.game.renderer.update_tilemap()
         self.game.renderer.enqueue_all(self.game.entities)
-        print("new cam pos", self.game.renderer.camera.rect)
+        utils.log(f"Camera RESIZE: {self.game.renderer.camera}")
 
 
 class CameraMoveCommand(Command):
@@ -70,7 +71,9 @@ class CameraMoveCommand(Command):
         self.game.renderer.camera.move((x, y))
         self.game.renderer.update_tilemap()
         self.game.renderer.enqueue_all(self.game.entities)
-        print("new cam pos", self.game.renderer.camera.rect)
+        utils.log(f"Camera MOVE: {self.game.renderer.camera}")
+
+
 
 
 class PauseGameCommand(Command):
