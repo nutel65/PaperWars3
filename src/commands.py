@@ -1,5 +1,6 @@
 """API to access specific game tasks accesible for user as a command."""
 import sys
+from src import utils
 
 class Command:
     """Command pattern abstraction."""
@@ -13,9 +14,7 @@ class Command:
 class EntityMoveCommand(Command):
     """Moves entity to destination px."""
     def execute(self, ent, dest_px):
-        # change entity state
         ent.set_pos_px(dest_px)
-        # lastly, request rendering of object
         self.game.renderer.render_request_list.append(ent)
 
 
@@ -46,7 +45,7 @@ class CameraZoomCommand(Command):
         self.game.renderer.camera.set_zoom(self.zoom)
         self.game.renderer.update_tilemap()
         self.game.renderer.enqueue_all(self.game.entities)
-        print("new cam pos", self.game.renderer.camera.rect)
+        utils.log(f"Camera RESIZE: {self.game.renderer.camera}")
 
 
 class CameraMoveCommand(Command):
@@ -66,11 +65,11 @@ class CameraMoveCommand(Command):
         elif self.direction == "left":
             x -= self.scalar
         else:
-            raise NotImplementedError(f"{self.direction} not implemented")
+            raise NotImplementedError(f"'{self.direction}' direction not implemented")
         self.game.renderer.camera.move((x, y))
         self.game.renderer.update_tilemap()
         self.game.renderer.enqueue_all(self.game.entities)
-        print("new cam pos", self.game.renderer.camera.rect)
+        utils.log(f"Camera MOVE: {self.game.renderer.camera}")
 
 
 class PauseGameCommand(Command):

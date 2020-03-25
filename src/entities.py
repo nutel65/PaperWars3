@@ -3,6 +3,7 @@ should implements one of classes included in this module.
 """
 import assets
 import pygame
+from src import utils
 from src import commands
 
 class Entity():
@@ -40,11 +41,18 @@ class Drawable(Entity):
     def __init__(self, *args, **kwargs):
         self.image = None # pygame.Surface
         self.rect = None # pygame.Rect
-        self.RENDER_PRIORITY = None # int
+        self.RENDER_PRIORITY = 1 # int
+        # SCREEN_STATIC has precedence over MAP_STATIC
+        self.MAP_STATIC = False # if true object behaves like part of map while rendering
+        self.SCREEN_STATIC = False # determines whether object moves along with camera
+        raise NotImplementedError
 
-    def draw(self, dest_surf, pos_px, area=None):
-        """Intended to be called from renderer."""
-        dest_surf.blit(self.image, pos_px, area)
+    def draw(self, dest_surf, pos_px, area=None, scale=1.0):
+        """Intended to be called from renderer.
+        Override this method for custom drawing behaviour.
+        """
+        scaled_image = utils.scale_image(self.image, scale)
+        dest_surf.blit(scaled_image, pos_px, area)
 
 
 class Soldier(Drawable):
@@ -53,6 +61,8 @@ class Soldier(Drawable):
         self.rect = self.image.get_rect()
         self.rect.topleft = pos_px
         self.RENDER_PRIORITY = 2
+        self.MAP_STATIC = True
+        self.SCREEN_STATIC = False
 
     def get_pos_px(self):
         return self.rect.topleft

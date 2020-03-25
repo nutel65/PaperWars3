@@ -6,6 +6,7 @@ import os
 import pygame
 import numpy
 import functools
+from datetime import datetime
 from src import entities
 from pygame.locals import QUIT, KEYDOWN, K_ESCAPE
 
@@ -24,13 +25,13 @@ def px_to_index(px, shift=(0, 0)):
     return px
 
 
-def shifted_point(coords, vector) -> pygame.Rect:
+def shifted_point(coords, vector):
     x, y = coords
     xv, yv = vector
     return (x + xv, y + yv)
 
 
-def shifted_rect(rect, vector) -> pygame.Rect:
+def shifted_rect(rect, vector):
     tmp_rect = rect.copy()
     x, y = tmp_rect.topleft
     tmp_rect.topleft = (x - vector[0], y - vector[1])
@@ -64,6 +65,21 @@ class TilemapFileParser():
 
 
 @functools.lru_cache()
-def scale_image(image, scale=1):
-    ts = int(32 * scale)
-    return pygame.transform.scale(image, (ts, ts))
+def scale_image(image, scale=1.0):
+    rect = image.get_rect()
+    w = int(rect.w * scale)
+    h = int(rect.h * scale)
+    return pygame.transform.scale(image, (w, h))
+
+
+def scale_rect(rect, scale=1.0):
+    w = int(rect.w * scale)
+    h = int(rect.h * scale)
+    return pygame.Rect(rect.left, rect.top, w, h)
+
+
+def log(msg="", type="Info", time=True, output=print):
+    t = ""
+    if time:
+        t = datetime.now().strftime("%H:%M:%S:%f")[:-3]
+    output(f"[{type}]:({t}): {msg}")

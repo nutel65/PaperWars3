@@ -31,9 +31,11 @@ class Renderer:
 
         self.WINDOW_WIDTH = 640
         self.WINDOW_HEIGHT = 480
-        self.DISPLAY_RECT = pygame.Rect(50, 50, self.WINDOW_WIDTH - 100, self.WINDOW_HEIGHT - 100)
+        self.DISPLAY_RECT = pygame.Rect(0, 0, self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
+        # self.DISPLAY_RECT = pygame.Rect(0, 0, self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
+
         self.screen = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
-        print("[Info]: Pygame display initialized")
+        utils.log("Pygame display initialized")
 
         assets.load_textures()
         # array = utils.TilemapFileParser("assets/maps/test.tm").parse()
@@ -44,29 +46,46 @@ class Renderer:
     def get_window_size(self):
         return (self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
 
+    def get_entity_screen_rect(self, ent):
+        if ent.SCREEN_STATIC:
+            return ent.rect
+        screen_x = (ent.rect.topleft[0] * self.camera.get_zoom()) - self.camera.rect.topleft[0] + self.DISPLAY_RECT.x
+        screen_y = (ent.rect.topleft[1] * self.camera.get_zoom()) - self.camera.rect.topleft[1] + self.DISPLAY_RECT.y
+        width, height = ent.rect.size
+        return utils.scale_rect(pygame.Rect(screen_x, screen_y, width, height), self.camera.get_zoom())
+
+    def _is_valid_request(self, ent):
+        """Returns True if entity is located in its draw area."""
+        ent_screen_rect = self.get_entity_screen_rect(ent)
+        if ent.MAP_STATIC:
+            if ent_screen_rect.colliderect(self.DISPLAY_RECT):
+                return True
+        elif ent_screen_rect.colliderect(self.screen.get_rect()):
+            return True
+        return False
+
     def _draw(self, entity):
-        """Render single entity (call its draw() method)"""
-        screen_x = entity.rect.topleft[0] - self.camera.rect.topleft[0]
-        screen_y = entity.rect.topleft[1] - self.camera.rect.topleft[1]
-        # # additional clear if object's image is transparent (to prevent overlapping).
-        # if entity.image.get_alpha() is not None:
-        #     self._clear(entity)
-        # self.screen.blit(entity.image, (screen_x, screen_y)) # area param?
-        entity.draw(self.screen, (screen_x, screen_y)) # area param?
-        self.dirty_rects.append(entity.rect)
+        """Render single entity (call its draw() method)."""
+        # TODO: Draw parially entities that are parially out of self.DISPLAY_RECT
+        ent_screen_rect = self.get_entity_screen_rect(entity)
+        # print(f"old topleft: {entity.rect.topleft}, new: {ent_screen_rect.topleft}")
+        entity.draw(self.screen, ent_screen_rect, scale=self.camera.get_zoom()) # area param?
+        self.dirty_rects.append(ent_screen_rect)
     
     def _clear(self, entity):
-        """Draw background over current object's position"""
-        screen_x = entity.rect.topleft[0] - self.camera.rect.topleft[0]
-        screen_y = entity.rect.topleft[1] - self.camera.rect.topleft[1]
-
-        self.screen.blit(self.background, (screen_x, screen_y), entity.rect)
-        self.dirty_rects.append(entity.rect)
+        """Draw background over current object's position."""
+        ent_screen_rect = self.get_entity_screen_rect(entity)
+        self.screen.blit(self.background, ent_screen_rect, ent_screen_rect)
+        self.dirty_rects.append(ent_screen_rect)
 
     def update(self):
         """Processes render_request_list and dirty_rects.
         Call this at the end of main loop.
         """ 
+        # If ent.MAP_STATIC, then filter out requests which are completely out of self.DISPLAY_RECT
+        # else just filter out those that are completely out of self.screen.rect
+        self.render_request_list = list(filter(self._is_valid_request, self.render_request_list))
+
         # sort render_request_list to preserve proper order of rendering
         self.render_request_list.sort(key=lambda x: x.RENDER_PRIORITY, reverse=True)
         # redraw each element in render list and then remove them from that list
@@ -77,13 +96,15 @@ class Renderer:
             self._draw(ent)
             counter += 1
         if counter > 0:
-            print(f"[Info]: Rendered total {counter} objects")
+            utils.log(f"RENDERER: Rendered total {counter} objects")
+
         # update dirty rects
         pygame.display.update(self.dirty_rects)
         self.dirty_rects.clear()
         self.frame_clock.tick(self.MAX_FPS)
     
     def enqueue_all(self, iterable):
+        """Add all entities to render_request_list from iterable."""
         self.render_request_list.extend(iterable)
 
     def update_tilemap(self):
@@ -93,7 +114,8 @@ class Renderer:
         self.screen.fill((0, 128, 0))
         self.background = self._tmr.render_full(scale=self.camera._zoom)
         self.screen.blit(self.background, self.DISPLAY_RECT, tmprect)
-        pygame.display.flip()
+        self.dirty_rects.append(self.DISPLAY_RECT)
+        utils.log("RENDERER: Rendered tilemap")
 
 
 class TilemapRenderer():
