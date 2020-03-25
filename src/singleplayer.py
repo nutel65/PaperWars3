@@ -1,7 +1,6 @@
 """All action for single player game."""
 import assets
 import pygame
-from src import utils
 from src import controls
 
 def run(game):

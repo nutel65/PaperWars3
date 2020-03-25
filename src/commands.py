@@ -1,6 +1,6 @@
 """API to access specific game tasks accesible for user as a command."""
 import sys
-from src import utils
+from engine import utils
 
 class Command:
     """Command pattern abstraction."""

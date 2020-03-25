@@ -29,6 +29,10 @@ class EventHandler():
     def handle(self, event):
         if event.type == pygame.KEYDOWN:
             self._handle_keydown(event)
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            self._handle_mouse_click(event)
+        elif event.type == pygame.MOUSEMOTION:
+            self._handle_mouse_motion(event)
 
     def _handle_keydown(self, event):
         if event.key == pygame.K_EQUALS:
@@ -45,3 +49,11 @@ class EventHandler():
             self.camera_up.execute()
         if event.key == pygame.K_DOWN:
             self.camera_down.execute()
+
+    def _handle_mouse_click(self, event):
+        click_pos = self.game.state.get_global_mouse_pos()
+        print(click_pos)
+        self.game.state.local["last_click_pos"] = click_pos
+
+    def _handle_mouse_motion(self, event):
+        ...

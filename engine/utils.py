@@ -11,38 +11,38 @@ from src import entities
 from pygame.locals import QUIT, KEYDOWN, K_ESCAPE
 
 
-def index_to_px(index, shift=(0, 0)):
-    x, y = index
-    index = (x * 32 + shift[0], y * 32 + shift[1])
-    return index
+# def index_to_px(index, shift=(0, 0)):
+#     x, y = index
+#     index = (x * 32 + shift[0], y * 32 + shift[1])
+#     return index
 
 
-def px_to_index(px, shift=(0, 0)):
-    x, y = px
-    x -= shift[0]
-    y -= shift[1]
-    px = (x // 32, y // 32)
-    return px
+# def px_to_index(px, shift=(0, 0)):
+#     x, y = px
+#     x -= shift[0]
+#     y -= shift[1]
+#     px = (x // 32, y // 32)
+#     return px
 
 
-def shifted_point(coords, vector):
-    x, y = coords
-    xv, yv = vector
-    return (x + xv, y + yv)
+# def shifted_point(coords, vector):
+#     x, y = coords
+#     xv, yv = vector
+#     return (x + xv, y + yv)
 
 
-def shifted_rect(rect, vector):
-    tmp_rect = rect.copy()
-    x, y = tmp_rect.topleft
-    tmp_rect.topleft = (x - vector[0], y - vector[1])
-    return tmp_rect
+# def shifted_rect(rect, vector):
+#     tmp_rect = rect.copy()
+#     x, y = tmp_rect.topleft
+#     tmp_rect.topleft = (x - vector[0], y - vector[1])
+#     return tmp_rect
 
 
-class DotDict(dict):
-    """dot.notation access to dictionary attributes"""
-    __getattr__ = dict.get
-    __setattr__ = dict.__setitem__
-    __delattr__ = dict.__delitem__
+# class DotDict(dict):
+#     """dot.notation access to dictionary attributes"""
+#     __getattr__ = dict.get
+#     __setattr__ = dict.__setitem__
+#     __delattr__ = dict.__delitem__
 
 
 class TilemapFileParser():

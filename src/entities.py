@@ -3,7 +3,7 @@ should implements one of classes included in this module.
 """
 import assets
 import pygame
-from src import utils
+from engine import utils
 from src import commands
 
 class Entity():
@@ -44,7 +44,7 @@ class Drawable(Entity):
         self.RENDER_PRIORITY = 1 # int
         # SCREEN_STATIC has precedence over MAP_STATIC
         self.MAP_STATIC = False # if true object behaves like part of map while rendering
-        self.SCREEN_STATIC = False # determines whether object moves along with camera
+        self.SCREEN_STATIC = False # determines whether object moves / zooms along with camera
         raise NotImplementedError
 
     def draw(self, dest_surf, pos_px, area=None, scale=1.0):

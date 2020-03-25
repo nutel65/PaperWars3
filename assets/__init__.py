@@ -9,7 +9,7 @@ constants:
     ICONS
 """
 import pygame
-from src import utils
+from engine import utils
 
 TILEMAP_TEXTURES = None
 SPRITES = None

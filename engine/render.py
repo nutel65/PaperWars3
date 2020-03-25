@@ -3,7 +3,7 @@ import pygame
 import os
 import functools
 import assets
-from src import utils
+from engine import utils
 from src import commands
 from src.entities import Camera
 
@@ -57,6 +57,8 @@ class Renderer:
     def _is_valid_request(self, ent):
         """Returns True if entity is located in its draw area."""
         ent_screen_rect = self.get_entity_screen_rect(ent)
+        # If ent.MAP_STATIC, then filter out requests which are completely out of self.DISPLAY_RECT
+        # else just filter out those that are completely out of self.screen.rect
         if ent.MAP_STATIC:
             if ent_screen_rect.colliderect(self.DISPLAY_RECT):
                 return True
@@ -69,7 +71,13 @@ class Renderer:
         # TODO: Draw parially entities that are parially out of self.DISPLAY_RECT
         ent_screen_rect = self.get_entity_screen_rect(entity)
         # print(f"old topleft: {entity.rect.topleft}, new: {ent_screen_rect.topleft}")
-        entity.draw(self.screen, ent_screen_rect, scale=self.camera.get_zoom()) # area param?
+        # Don't scale entity while it is SCREEN_STATIC.
+        if entity.SCREEN_STATIC:
+            zoom = 1.0
+        else:
+            zoom = self.camera.get_zoom()
+
+        entity.draw(self.screen, ent_screen_rect, scale=zoom) # area param?
         self.dirty_rects.append(ent_screen_rect)
     
     def _clear(self, entity):
@@ -82,8 +90,7 @@ class Renderer:
         """Processes render_request_list and dirty_rects.
         Call this at the end of main loop.
         """ 
-        # If ent.MAP_STATIC, then filter out requests which are completely out of self.DISPLAY_RECT
-        # else just filter out those that are completely out of self.screen.rect
+        # Filter out redundant entities.
         self.render_request_list = list(filter(self._is_valid_request, self.render_request_list))
 
         # sort render_request_list to preserve proper order of rendering
