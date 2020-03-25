@@ -31,7 +31,7 @@ class Renderer:
 
         self.WINDOW_WIDTH = 640
         self.WINDOW_HEIGHT = 480
-        self.DISPLAY_RECT = pygame.Rect(50, 50, self.WINDOW_WIDTH - 100, self.WINDOW_HEIGHT - 100)
+        self.DISPLAY_RECT = pygame.Rect(0, 0, self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
         # self.DISPLAY_RECT = pygame.Rect(0, 0, self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
 
         self.screen = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
@@ -48,12 +48,11 @@ class Renderer:
 
     def get_entity_screen_rect(self, ent):
         if ent.SCREEN_STATIC:
-            print("static entity")
             return ent.rect
-        screen_x = (ent.rect.topleft[0] - self.camera.rect.topleft[0]) + self.DISPLAY_RECT.x
-        screen_y = (ent.rect.topleft[1] - self.camera.rect.topleft[1]) + self.DISPLAY_RECT.y
+        screen_x = (ent.rect.topleft[0] * self.camera.get_zoom()) - self.camera.rect.topleft[0] + self.DISPLAY_RECT.x
+        screen_y = (ent.rect.topleft[1] * self.camera.get_zoom()) - self.camera.rect.topleft[1] + self.DISPLAY_RECT.y
         width, height = ent.rect.size
-        return pygame.Rect(screen_x, screen_y, width, height)
+        return utils.scale_rect(pygame.Rect(screen_x, screen_y, width, height), self.camera.get_zoom())
 
     def _is_valid_request(self, ent):
         """Returns True if entity is located in its draw area."""
@@ -69,12 +68,8 @@ class Renderer:
         """Render single entity (call its draw() method)."""
         # TODO: Draw parially entities that are parially out of self.DISPLAY_RECT
         ent_screen_rect = self.get_entity_screen_rect(entity)
-        print(f"old topleft: {entity.rect.topleft}, new: {ent_screen_rect.topleft}")
-        # # additional clear if object's image is transparent (to prevent overlapping).
-        # if entity.image.get_alpha() is not None:
-        #     self._clear(entity)
-        # self.screen.blit(entity.image, (screen_x, screen_y)) # area param?
-        entity.draw(self.screen, ent_screen_rect) # area param?
+        # print(f"old topleft: {entity.rect.topleft}, new: {ent_screen_rect.topleft}")
+        entity.draw(self.screen, ent_screen_rect, scale=self.camera.get_zoom()) # area param?
         self.dirty_rects.append(ent_screen_rect)
     
     def _clear(self, entity):
@@ -109,6 +104,7 @@ class Renderer:
         self.frame_clock.tick(self.MAX_FPS)
     
     def enqueue_all(self, iterable):
+        """Add all entities to render_request_list from iterable."""
         self.render_request_list.extend(iterable)
 
     def update_tilemap(self):

@@ -1,4 +1,4 @@
-"""All action for single player game happens here."""
+"""All action for single player game."""
 import assets
 import pygame
 from src import utils
