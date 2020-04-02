@@ -153,4 +153,6 @@ class TilemapRenderer():
         raise NotImplementedError
 
 
-
+# decorator
+def grid_snap():
+    ...

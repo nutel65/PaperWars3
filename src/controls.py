@@ -1,6 +1,7 @@
 """This module contains functions for handling user input."""
 import pygame
 from src import commands
+from engine import utils
 
 def pump_events(self):
     pygame.event.pump()
@@ -25,6 +26,7 @@ class EventHandler():
         self.camera_right = commands.CameraMoveCommand(game, "right", 50)
         self.camera_up = commands.CameraMoveCommand(game, "up", 50)
         self.camera_down = commands.CameraMoveCommand(game, "down", 50)
+        self.camera_center_on_px = commands.CameraCenterOnCommand(game)
 
     def handle(self, event):
         if event.type == pygame.KEYDOWN:
@@ -49,10 +51,12 @@ class EventHandler():
             self.camera_up.execute()
         if event.key == pygame.K_DOWN:
             self.camera_down.execute()
+        if event.key == pygame.K_RETURN:
+            self.camera_center_on_px.execute(self.game.state.get_global_mouse_pos())
 
     def _handle_mouse_click(self, event):
         click_pos = self.game.state.get_global_mouse_pos()
-        print(click_pos)
+        utils.log(click_pos)
         self.game.state.local["last_click_pos"] = click_pos
 
     def _handle_mouse_motion(self, event):

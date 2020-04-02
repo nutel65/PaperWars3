@@ -72,5 +72,16 @@ class CameraMoveCommand(Command):
         utils.log(f"Camera MOVE: {self.game.renderer.camera}")
 
 
+class CameraCenterOnCommand(Command):
+    def execute(self, dest_px):
+        cam = self.game.renderer.camera
+        cam.move_center(dest_px)
+        # cam.move_center(self.game.renderer.DISPLAY_RECT.center)
+        self.game.renderer.update_tilemap()
+        self.game.renderer.enqueue_all(self.game.entities)
+        # utils.log(f"Camera CENTER on {self.game.renderer.DISPLAY_RECT.center}: {cam}, (camera.center:{cam.rect.center})")
+        utils.log(f"Camera CENTER on {dest_px}: {cam}, (camera.center:{cam.rect.center})")
+
+
 class PauseGameCommand(Command):
     pass

@@ -24,8 +24,11 @@ class Camera(Entity):
         # what camera sees
         self.rect = pygame.Rect(camera_x, camera_y, view_width, view_height)
 
-    def move(self, pos_px):
-        self.rect.topleft = pos_px
+    def move(self, dest_px):
+        self.rect.topleft = dest_px
+
+    def move_center(self, dest_px):
+        self.rect.center = dest_px
 
     def set_zoom(self, zoom_value):
         self._zoom = zoom_value
@@ -34,6 +37,9 @@ class Camera(Entity):
 
     def get_zoom(self):
         return self._zoom
+
+    def normalize_position(self, bound_rect):
+        ...
 
 
 class Drawable(Entity):
