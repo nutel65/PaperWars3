@@ -48,7 +48,9 @@ class Renderer:
         return (self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
 
     def get_entity_screen_rect(self, ent):
+        """Returns screen position (in form of pygame.Rect) for entity to be rendered to."""
         if ent.SCREEN_STATIC:
+            # Static entities do not move along with map.
             return ent.rect
         screen_x = (ent.rect.topleft[0] * self.camera.get_zoom()) - self.camera.rect.topleft[0] + self.DISPLAY_RECT.x
         screen_y = (ent.rect.topleft[1] * self.camera.get_zoom()) - self.camera.rect.topleft[1] + self.DISPLAY_RECT.y
@@ -154,6 +156,6 @@ class TilemapRenderer():
         raise NotImplementedError
 
 
-# decorator
+# decorator?
 def grid_snap():
     ...

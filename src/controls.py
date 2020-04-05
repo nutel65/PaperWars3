@@ -22,9 +22,8 @@ class EventHandler():
         self.zoom_in = commands.CameraZoomCommand(game, 2.0)
         self.zoom_out = commands.CameraZoomCommand(game, 0.5)
         self.reset_zoom = commands.CameraZoomCommand(game, 1.0)
-        # self.camera_left = commands.CameraMoveCommand(game, "left", 50)
         self.camera_move_by = commands.CameraMoveByCommand(game)
-        self.camera_center_on_px = commands.CameraCenterOnCommand(game)
+        self.camera_center_on = commands.CameraCenterOnCommand(game)
 
     def handle(self, event):
         if event.type == pygame.KEYDOWN:
@@ -43,23 +42,28 @@ class EventHandler():
             self.reset_zoom.execute()
 
         if event.key == pygame.K_LEFT:
-            self.camera_move_by.execute(-50, 0)
+            self.camera_move_by.execute(-32, 0)
         if event.key == pygame.K_RIGHT:
-            self.camera_move_by.execute(50, 0)
+            self.camera_move_by.execute(32, 0)
         if event.key == pygame.K_UP:
-            self.camera_move_by.execute(0, -50)
+            self.camera_move_by.execute(0, -32)
         if event.key == pygame.K_DOWN:
-            self.camera_move_by.execute(0, 50)
+            self.camera_move_by.execute(0, 32)
 
         if event.key == pygame.K_RETURN:
-            self.camera_center_on_px.execute(self.game.state.get_global_mouse_pos())
+            renderer = self.game.renderer
+            map_center = utils.local_to_global(renderer, renderer.camera.tilemap_rect.center)
+            self.camera_center_on.execute(map_center)
 
     def _handle_mouse_click(self, event):
         glob_pos = self.game.state.get_global_mouse_pos()
-        screen_pos = (self.game.state.get_screen_mouse_pos(), utils.global_to_local(self.game, glob_pos))
-
+        screen_pos = (self.game.state.get_screen_mouse_pos())
         utils.log(f"map: {glob_pos}; screen: {screen_pos}")
         self.game.state.local["last_click_pos"] = glob_pos
+
+        # center camera on clicked area
+        self.camera_center_on.execute(glob_pos)
+
 
     def _handle_mouse_motion(self, event):
         ...

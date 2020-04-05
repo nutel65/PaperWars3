@@ -25,6 +25,7 @@ class EntityAttackCommand(Command):
 
 
 class ResetGameCommand(Command):
+    """Resets game state."""
     def execute(self):
         self.game.entities.clear()
         self.game.renderer.camera = render.Camera()
@@ -37,6 +38,7 @@ class ExitGameCommand(Command):
 
 
 class CameraZoomCommand(Command):
+    """Zooms camera view by passed zoom parameter."""
     def __init__(self, game_obj, zoom=1.0):
         self.game = game_obj
         self.zoom = float(zoom)
@@ -49,23 +51,9 @@ class CameraZoomCommand(Command):
 
 
 class CameraMoveByCommand(Command):
-    # def __init__(self, game_obj, direction, scalar):
-    #     self.game = game_obj
-    #     self.direction = direction
-    #     self.scalar = scalar
-
+    """Moves camera by passed values. Relative map view changes inversely."""
     def execute(self, shift_x, shift_y):
         x, y = self.game.renderer.camera.rect.topleft
-        # if self.direction == "up":
-        #     y -= self.scalar
-        # elif self.direction == "down":
-        #     y += self.scalar
-        # elif self.direction == "right":
-        #     x += self.scalar
-        # elif self.direction == "left":
-        #     x -= self.scalar
-        # else:
-        #     raise NotImplementedError(f"'{self.direction}' direction not implemented")
         self.game.renderer.camera.move((x + shift_x, y + shift_y))
         self.game.renderer.update_tilemap()
         self.game.renderer.enqueue_all(self.game.entities)
@@ -73,17 +61,13 @@ class CameraMoveByCommand(Command):
 
 
 class CameraCenterOnCommand(Command):
-    def execute(self, dest_px):
+    """Sets map centered relatively to given global position."""
+    def execute(self, new_center):
         cam = self.game.renderer.camera
-        # cam.move_center(dest_px)
-        dest = utils.local_to_global(self.game.renderer, self.game.renderer.DISPLAY_RECT.center)
-        cam.set_center(dest)
+        cam.set_center(new_center)
         self.game.renderer.update_tilemap()
         self.game.renderer.enqueue_all(self.game.entities)
-        utils.log(f"Camera CENTERED on: map pos:{dest}; DISPLAY_RECT.center:{self.game.renderer.DISPLAY_RECT.center}"\
-                  f"camera:{cam}; camera.center:{cam.rect.center}, cam.tilemap_rect:{cam.tilemap_rect}; "\
-                  f"cam.tilemap_rect.center: {cam.tilemap_rect.center}")
-        # utils.log(f"Camera CENTER on {dest_px}: {cam}, (camera.center:{cam.rect.center})")
+        utils.log(f"Camera CENTERED on: GLOBAL:{new_center}; {cam}")
 
 
 class PauseGameCommand(Command):

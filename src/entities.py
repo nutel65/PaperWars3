@@ -9,7 +9,7 @@ from src import commands
 class Entity():
     """Represents any game object"""
     def __init__(self, *args, **kwargs):
-        self.rect = None
+        raise NotImplementedError
 
     def __str__(self):
         return f"{type(self).__name__}({self.rect})"
@@ -27,15 +27,24 @@ class Camera(Entity):
         self.tilemap_rect = self.rect.copy()
 
     def move(self, dest_px):
+        """Set top left corner or camera to given destination position."""
         x, y = dest_px
         self.rect.topleft = dest_px
         self.tilemap_rect.topleft = (-x, -y)
 
-    def set_center(self, glob_dest_px):
-        x, y, w, h = self.tilemap_rect
-        glob_map_center = utils.local_to_global(self.game, self.tilemap_rect.center)
+    def set_center(self, new_center):
+        """Set desired global position (of map) as a center of display."""
+        display_center = self.renderer.DISPLAY_RECT.center
+        map_center = utils.global_to_local(self.renderer, new_center)
+        # print("display center", display_center)
+        # print("map center", map_center)
+        shift_x = map_center[0] - display_center[0]
+        shift_y = map_center[1] - display_center[1]
+        x, y = self.rect.topleft
+        self.move((x + shift_x, y + shift_y))
 
     def set_zoom(self, zoom_value):
+        """Set camera's zoom value (and recalculate rects)."""
         self._zoom = zoom_value
         w, h = self._default_rect.size
         self.rect.size = (w // zoom_value, h // zoom_value)
@@ -45,6 +54,7 @@ class Camera(Entity):
         return self._zoom
 
     def normalize_position(self, bound_rect):
+        """Shift camera position to fit camera.rect in renderer.DISPLAY_RECT."""
         ...
 
 
