@@ -17,23 +17,29 @@ class Entity():
 
 class Camera(Entity):
     """Alters field of view and rendering. Allows to change zoom, and move camera."""
-    def __init__(self, camera_x, camera_y, view_width, view_height):
+    def __init__(self, renderer, camera_x, camera_y, view_width, view_height):
+        self.renderer = renderer
         self._zoom = 1.0
         # default rect used to scale
         self._default_rect = pygame.Rect(camera_x, camera_y, view_width, view_height)
         # what camera sees
         self.rect = pygame.Rect(camera_x, camera_y, view_width, view_height)
+        self.tilemap_rect = self.rect.copy()
 
     def move(self, dest_px):
+        x, y = dest_px
         self.rect.topleft = dest_px
+        self.tilemap_rect.topleft = (-x, -y)
 
-    def move_center(self, dest_px):
-        self.rect.center = dest_px
+    def set_center(self, glob_dest_px):
+        x, y, w, h = self.tilemap_rect
+        glob_map_center = utils.local_to_global(self.game, self.tilemap_rect.center)
 
     def set_zoom(self, zoom_value):
         self._zoom = zoom_value
         w, h = self._default_rect.size
         self.rect.size = (w // zoom_value, h // zoom_value)
+        self.tilemap_rect.size = (w * zoom_value, h * zoom_value)
 
     def get_zoom(self):
         return self._zoom

@@ -78,6 +78,24 @@ def scale_rect(rect, scale=1.0):
     return pygame.Rect(rect.left, rect.top, w, h)
 
 
+def local_to_global(renderer, local_pos):
+    zoom = renderer.camera.get_zoom()
+    global_x = (local_pos[0] + renderer.camera.rect.x) / zoom + renderer.DISPLAY_RECT.x
+    global_y = (local_pos[1] + renderer.camera.rect.y) / zoom + renderer.DISPLAY_RECT.y
+    ## DEBUG:
+    # ent = next(iter(game.entities))
+    # game.renderer.global.blit(ent.image, (global_x, global_y))
+    # pygame.display.flip()
+    return (global_x, global_y)
+
+
+def global_to_local(renderer, global_pos):
+    zoom = renderer.camera.get_zoom()
+    local_x = zoom * (global_pos[0] - renderer.DISPLAY_RECT.x) - renderer.camera.rect.x
+    local_y = zoom * (global_pos[1] - renderer.DISPLAY_RECT.y) - renderer.camera.rect.y
+    return (local_x, local_y)
+
+
 def log(msg="", type="Info", time=True, output=print):
     t = ""
     if time:

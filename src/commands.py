@@ -48,25 +48,25 @@ class CameraZoomCommand(Command):
         utils.log(f"Camera RESIZE: {self.game.renderer.camera}")
 
 
-class CameraMoveCommand(Command):
-    def __init__(self, game_obj, direction, scalar):
-        self.game = game_obj
-        self.direction = direction
-        self.scalar = scalar
+class CameraMoveByCommand(Command):
+    # def __init__(self, game_obj, direction, scalar):
+    #     self.game = game_obj
+    #     self.direction = direction
+    #     self.scalar = scalar
 
-    def execute(self):
+    def execute(self, shift_x, shift_y):
         x, y = self.game.renderer.camera.rect.topleft
-        if self.direction == "up":
-            y -= self.scalar
-        elif self.direction == "down":
-            y += self.scalar
-        elif self.direction == "right":
-            x += self.scalar
-        elif self.direction == "left":
-            x -= self.scalar
-        else:
-            raise NotImplementedError(f"'{self.direction}' direction not implemented")
-        self.game.renderer.camera.move((x, y))
+        # if self.direction == "up":
+        #     y -= self.scalar
+        # elif self.direction == "down":
+        #     y += self.scalar
+        # elif self.direction == "right":
+        #     x += self.scalar
+        # elif self.direction == "left":
+        #     x -= self.scalar
+        # else:
+        #     raise NotImplementedError(f"'{self.direction}' direction not implemented")
+        self.game.renderer.camera.move((x + shift_x, y + shift_y))
         self.game.renderer.update_tilemap()
         self.game.renderer.enqueue_all(self.game.entities)
         utils.log(f"Camera MOVE: {self.game.renderer.camera}")
@@ -75,12 +75,15 @@ class CameraMoveCommand(Command):
 class CameraCenterOnCommand(Command):
     def execute(self, dest_px):
         cam = self.game.renderer.camera
-        cam.move_center(dest_px)
-        # cam.move_center(self.game.renderer.DISPLAY_RECT.center)
+        # cam.move_center(dest_px)
+        dest = utils.local_to_global(self.game.renderer, self.game.renderer.DISPLAY_RECT.center)
+        cam.set_center(dest)
         self.game.renderer.update_tilemap()
         self.game.renderer.enqueue_all(self.game.entities)
-        # utils.log(f"Camera CENTER on {self.game.renderer.DISPLAY_RECT.center}: {cam}, (camera.center:{cam.rect.center})")
-        utils.log(f"Camera CENTER on {dest_px}: {cam}, (camera.center:{cam.rect.center})")
+        utils.log(f"Camera CENTERED on: map pos:{dest}; DISPLAY_RECT.center:{self.game.renderer.DISPLAY_RECT.center}"\
+                  f"camera:{cam}; camera.center:{cam.rect.center}, cam.tilemap_rect:{cam.tilemap_rect}; "\
+                  f"cam.tilemap_rect.center: {cam.tilemap_rect.center}")
+        # utils.log(f"Camera CENTER on {dest_px}: {cam}, (camera.center:{cam.rect.center})")
 
 
 class PauseGameCommand(Command):
