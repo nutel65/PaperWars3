@@ -25,6 +25,7 @@ class EntityAttackCommand(Command):
 
 
 class ResetGameCommand(Command):
+    """Resets game state."""
     def execute(self):
         self.game.entities.clear()
         self.game.renderer.camera = render.Camera()
@@ -37,6 +38,7 @@ class ExitGameCommand(Command):
 
 
 class CameraZoomCommand(Command):
+    """Zooms camera view by passed zoom parameter."""
     def __init__(self, game_obj, zoom=1.0):
         self.game = game_obj
         self.zoom = float(zoom)
@@ -48,28 +50,24 @@ class CameraZoomCommand(Command):
         utils.log(f"Camera RESIZE: {self.game.renderer.camera}")
 
 
-class CameraMoveCommand(Command):
-    def __init__(self, game_obj, direction, scalar):
-        self.game = game_obj
-        self.direction = direction
-        self.scalar = scalar
-
-    def execute(self):
+class CameraMoveByCommand(Command):
+    """Moves camera by passed values. Relative map view changes inversely."""
+    def execute(self, shift_x, shift_y):
         x, y = self.game.renderer.camera.rect.topleft
-        if self.direction == "up":
-            y -= self.scalar
-        elif self.direction == "down":
-            y += self.scalar
-        elif self.direction == "right":
-            x += self.scalar
-        elif self.direction == "left":
-            x -= self.scalar
-        else:
-            raise NotImplementedError(f"'{self.direction}' direction not implemented")
-        self.game.renderer.camera.move((x, y))
+        self.game.renderer.camera.move((x + shift_x, y + shift_y))
         self.game.renderer.update_tilemap()
         self.game.renderer.enqueue_all(self.game.entities)
         utils.log(f"Camera MOVE: {self.game.renderer.camera}")
+
+
+class CameraCenterOnCommand(Command):
+    """Sets map centered relatively to given global position."""
+    def execute(self, new_center):
+        cam = self.game.renderer.camera
+        cam.set_center(new_center)
+        self.game.renderer.update_tilemap()
+        self.game.renderer.enqueue_all(self.game.entities)
+        utils.log(f"Camera CENTERED on: GLOBAL:{new_center}; {cam}")
 
 
 class PauseGameCommand(Command):

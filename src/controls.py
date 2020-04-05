@@ -1,6 +1,7 @@
 """This module contains functions for handling user input."""
 import pygame
 from src import commands
+from engine import utils
 
 def pump_events(self):
     pygame.event.pump()
@@ -21,10 +22,8 @@ class EventHandler():
         self.zoom_in = commands.CameraZoomCommand(game, 2.0)
         self.zoom_out = commands.CameraZoomCommand(game, 0.5)
         self.reset_zoom = commands.CameraZoomCommand(game, 1.0)
-        self.camera_left = commands.CameraMoveCommand(game, "left", 50)
-        self.camera_right = commands.CameraMoveCommand(game, "right", 50)
-        self.camera_up = commands.CameraMoveCommand(game, "up", 50)
-        self.camera_down = commands.CameraMoveCommand(game, "down", 50)
+        self.camera_move_by = commands.CameraMoveByCommand(game)
+        self.camera_center_on = commands.CameraCenterOnCommand(game)
 
     def handle(self, event):
         if event.type == pygame.KEYDOWN:
@@ -41,19 +40,30 @@ class EventHandler():
             self.zoom_out.execute()
         if event.key == pygame.K_0:
             self.reset_zoom.execute()
+
         if event.key == pygame.K_LEFT:
-            self.camera_left.execute()
+            self.camera_move_by.execute(-32, 0)
         if event.key == pygame.K_RIGHT:
-            self.camera_right.execute()
+            self.camera_move_by.execute(32, 0)
         if event.key == pygame.K_UP:
-            self.camera_up.execute()
+            self.camera_move_by.execute(0, -32)
         if event.key == pygame.K_DOWN:
-            self.camera_down.execute()
+            self.camera_move_by.execute(0, 32)
+
+        if event.key == pygame.K_RETURN:
+            renderer = self.game.renderer
+            map_center = utils.local_to_global(renderer, renderer.camera.tilemap_rect.center)
+            self.camera_center_on.execute(map_center)
 
     def _handle_mouse_click(self, event):
-        click_pos = self.game.state.get_global_mouse_pos()
-        print(click_pos)
-        self.game.state.local["last_click_pos"] = click_pos
+        glob_pos = self.game.state.get_global_mouse_pos()
+        screen_pos = (self.game.state.get_screen_mouse_pos())
+        utils.log(f"map: {glob_pos}; screen: {screen_pos}")
+        self.game.state.local["last_click_pos"] = glob_pos
+
+        # center camera on clicked area
+        self.camera_center_on.execute(glob_pos)
+
 
     def _handle_mouse_motion(self, event):
         ...

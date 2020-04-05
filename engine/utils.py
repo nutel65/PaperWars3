@@ -1,5 +1,5 @@
 """Commonly used utilities, tools and other code,
-that is used often but didn't fit anywhere else
+that is used often but didn't fit anywhere else.
 """
 import sys
 import os
@@ -42,7 +42,7 @@ from pygame.locals import QUIT, KEYDOWN, K_ESCAPE
 #     """dot.notation access to dictionary attributes"""
 #     __getattr__ = dict.get
 #     __setattr__ = dict.__setitem__
-#     __delattr__ = dict.__delitem__
+#     __delattr__ = dict.__delitem__    
 
 
 class TilemapFileParser():
@@ -52,7 +52,7 @@ class TilemapFileParser():
         self._filename = filename
 
     def parse(self):
-        """Parses and returns result as numpy.array of ints"""
+        """Parses file and returns result as numpy.array of ints."""
         result = []
         with open(self._filename) as tilemap:
             for line in tilemap.read().splitlines():
@@ -66,6 +66,7 @@ class TilemapFileParser():
 
 @functools.lru_cache()
 def scale_image(image, scale=1.0):
+    """Scales IMGAGE (pygame.Surface) to given SCALE."""
     rect = image.get_rect()
     w = int(rect.w * scale)
     h = int(rect.h * scale)
@@ -73,12 +74,38 @@ def scale_image(image, scale=1.0):
 
 
 def scale_rect(rect, scale=1.0):
+    """Scales RECT (pygame.Rect) to given SCALE."""
     w = int(rect.w * scale)
     h = int(rect.h * scale)
     return pygame.Rect(rect.left, rect.top, w, h)
 
 
+def local_to_global(renderer, local_pos):
+    """Converts local (bounded by camera) position 
+    to global (bound to size of tilemap) position.
+    """
+    zoom = renderer.camera.get_zoom()
+    global_x = (local_pos[0] + renderer.camera.rect.x) / zoom + renderer.DISPLAY_RECT.x
+    global_y = (local_pos[1] + renderer.camera.rect.y) / zoom + renderer.DISPLAY_RECT.y
+    ## DEBUG:
+    # ent = next(iter(game.entities))
+    # game.renderer.global.blit(ent.image, (global_x, global_y))
+    # pygame.display.flip()
+    return (global_x, global_y)
+
+
+def global_to_local(renderer, global_pos):
+    """Converts global (bound to size of tilemap)
+    position to local (bounded by camera) position.
+    """
+    zoom = renderer.camera.get_zoom()
+    local_x = zoom * (global_pos[0] - renderer.DISPLAY_RECT.x) - renderer.camera.rect.x
+    local_y = zoom * (global_pos[1] - renderer.DISPLAY_RECT.y) - renderer.camera.rect.y
+    return (local_x, local_y)
+
+
 def log(msg="", type="Info", time=True, output=print):
+    """Pass a message to given output (output is function)."""
     t = ""
     if time:
         t = datetime.now().strftime("%H:%M:%S:%f")[:-3]
