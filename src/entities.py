@@ -26,8 +26,8 @@ class Camera(Entity):
         self.rect = pygame.Rect(camera_x, camera_y, view_width, view_height)
         self.tilemap_rect = self.rect.copy()
 
-    def move(self, dest_px):
-        """Set top left corner or camera to given destination position."""
+    def set_topleft(self, dest_px):
+        """Set desired global position as top left corner of camera."""
         x, y = dest_px
         self.rect.topleft = dest_px
         self.tilemap_rect.topleft = (-x, -y)
@@ -36,12 +36,10 @@ class Camera(Entity):
         """Set desired global position (of map) as a center of display."""
         display_center = self.renderer.DISPLAY_RECT.center
         map_center = utils.global_to_local(self.renderer, new_center)
-        # print("display center", display_center)
-        # print("map center", map_center)
         shift_x = map_center[0] - display_center[0]
         shift_y = map_center[1] - display_center[1]
         x, y = self.rect.topleft
-        self.move((x + shift_x, y + shift_y))
+        self.set_topleft((x + shift_x, y + shift_y))
 
     def set_zoom(self, zoom_value):
         """Set camera's zoom value (and recalculate rects)."""

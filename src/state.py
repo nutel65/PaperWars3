@@ -1,4 +1,4 @@
-"""This file contains GameState class that holds global information about game's state"""
+"""This file contains snapshot of program state updated after every frame."""
 # import pygame
 from dataclasses import dataclass
 # from engine import utils

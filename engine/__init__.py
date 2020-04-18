@@ -48,9 +48,11 @@ class Game:
         cs.keys_pressed = pygame.key.get_pressed()
         cs.camera_zoom = self.renderer.camera.get_zoom()
         cs.camera_pos = self.renderer.camera.rect.topleft
+
         # update game state
         gs = self.game_state
         gs.remaining_turn_time = ... # todo: calculate remaining time
+        
         # update connection state
         c = self.connection_state
         c.connected = ... # todo: socket's is_connected() method
