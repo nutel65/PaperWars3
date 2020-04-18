@@ -38,25 +38,29 @@ class ExitGameCommand(Command):
         sys.exit(0)
 
 
+# TODO: It's bugged AF
 class CameraZoomCommand(Command):
     """Zooms camera view by passed zoom parameter.
-    zoom can be either '+' or '-'.
+    zoom_mode can be either '+' or '-'.
     """
-    def __init__(self, game_obj, zoom=None):
+    def __init__(self, game_obj, zoom_mode):
         self.game = game_obj
-        self.zoom = zoom
+        self.zoom_mode = zoom_mode
         self.cam_move_by = CameraMoveByCommand(self.game)
 
     def execute(self):
         cam = self.game.renderer.camera
         x1, y1 = self.game.client_state.mouse_pos_global
         # set zoom
-        cam.set_zoom(self.zoom)
+        if self.zoom_mode == '+':
+            zoom_change = 1
+        else:
+            zoom_change = -1
+        cam.set_zoom_id(cam.zoom_id + zoom_change)
         self.game.update_state()
+
         x2, y2 = p2 = self.game.client_state.mouse_pos_global
         diff = (x1 - x2, y1 - y2)
-        # diff = (x2 - x1, y2 - y1)
-        # print(p1, p2, diff)
         self.cam_move_by.execute(*diff)
 
         utils.log(f"Camera ZOOM on: GLOBAL:{p2}; {cam}")

@@ -19,7 +19,8 @@ class Camera(Entity):
     """Alters field of view and rendering. Allows to change zoom, and move camera."""
     def __init__(self, renderer, camera_x, camera_y, view_width, view_height):
         self.renderer = renderer
-        self._zoom = 1.0
+        self.zoom_id = 4
+        self.ZOOM_VALUES = [0.2, 0.5, 0.75, 0.9, 1.0, 1.1, 1.25, 1.5, 1.8]
         # default rect used to scale
         self._default_rect = pygame.Rect(camera_x, camera_y, view_width, view_height)
         # what camera sees
@@ -41,15 +42,19 @@ class Camera(Entity):
         x, y = self.rect.topleft
         self.set_topleft((x + shift_x, y + shift_y))
 
-    def set_zoom(self, zoom_value):
+    def set_zoom_id(self, zoom_id):
         """Set camera's zoom value (and recalculate rects)."""
-        self._zoom = zoom_value
+        try:
+            zoom_value = self.ZOOM_VALUES[zoom_id]
+        except IndexError:
+            return
+        self.zoom_id = zoom_id
         w, h = self._default_rect.size
         self.rect.size = (w // zoom_value, h // zoom_value)
         self.tilemap_rect.size = (w * zoom_value, h * zoom_value)
 
     def get_zoom(self):
-        return self._zoom
+        return self.ZOOM_VALUES[self.zoom_id]
 
     def normalize_position(self, bound_rect):
         """Shift camera position to fit camera.rect in renderer.DISPLAY_RECT."""

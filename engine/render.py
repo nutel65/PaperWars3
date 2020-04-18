@@ -122,7 +122,7 @@ class Renderer:
         width, height = self.DISPLAY_RECT.size
         tmprect = pygame.Rect(x, y, width, height)
         self.screen.fill((0, 128, 0))
-        self.background = self._tmr.render_full(scale=self.camera._zoom)
+        self.background = self._tmr.render_full(scale=self.camera.get_zoom())
         self.screen.blit(self.background, self.DISPLAY_RECT, tmprect)
         self.dirty_rects.append(self.DISPLAY_RECT)
         utils.log("RENDERER: Rendered tilemap")

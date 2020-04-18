@@ -19,9 +19,9 @@ class EventHandler():
     def __init__(self, game):
         self.game = game
         self.exit_game = commands.ExitGameCommand(game)
-        self.zoom_in = commands.CameraZoomCommand(game, 2.0)
-        self.zoom_out = commands.CameraZoomCommand(game, 0.5)
-        self.reset_zoom = commands.CameraZoomCommand(game, 1.0)
+        self.zoom_in = commands.CameraZoomCommand(game, '+')
+        self.zoom_out = commands.CameraZoomCommand(game, '-')
+        # self.reset_zoom = commands.CameraZoomCommand(game, 1.0)
         self.camera_move_by = commands.CameraMoveByCommand(game)
         self.camera_center = commands.CameraCenterCommand(game)
 
@@ -38,8 +38,8 @@ class EventHandler():
             self.zoom_in.execute()
         if event.key == pygame.K_MINUS:
             self.zoom_out.execute()
-        if event.key == pygame.K_0:
-            self.reset_zoom.execute()
+        # if event.key == pygame.K_0:
+        #     self.reset_zoom.execute()
 
         if event.key == pygame.K_LEFT:
             self.camera_move_by.execute(-32, 0)
@@ -56,12 +56,27 @@ class EventHandler():
             self.camera_center.execute()
 
     def _handle_mouse_click(self, event):
-        glob_pos = self.game.client_state.mouse_pos_global
-        screen_pos = self.game.client_state.mouse_pos_window
-        utils.log(f"map: {glob_pos}; screen: {screen_pos}")
-        self.game.client_state.last_click_pos = glob_pos
-        # # center camera on clicked area
-        # self.camera_center_on.execute(glob_pos)
+        # left click
+        if event.button == 1:
+            glob_pos = self.game.client_state.mouse_pos_global
+            screen_pos = self.game.client_state.mouse_pos_window
+            utils.log(f"map: {glob_pos}; screen: {screen_pos}")
+            self.game.client_state.last_click_pos = glob_pos
+            # # center camera on clicked area
+            # self.camera_center_on.execute(glob_pos)
+
+        # right click
+        if event.button == 2:
+            ...
+
+        # scroll up
+        if event.button == 4:
+            self.zoom_in.execute()
+
+        # scroll down
+        if event.button == 5:
+            self.zoom_out.execute()
+            
 
 
     def _handle_mouse_motion(self, event):
