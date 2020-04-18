@@ -70,6 +70,8 @@ def scale_image(image, scale=1.0):
     rect = image.get_rect()
     w = int(rect.w * scale)
     h = int(rect.h * scale)
+    # w = rect.w * scale
+    # h = rect.h * scale
     return pygame.transform.scale(image, (w, h))
 
 
@@ -77,6 +79,8 @@ def scale_rect(rect, scale=1.0):
     """Scales RECT (pygame.Rect) to given SCALE."""
     w = int(rect.w * scale)
     h = int(rect.h * scale)
+    # w = rect.w * scale
+    # h = rect.h * scale
     return pygame.Rect(rect.left, rect.top, w, h)
 
 

@@ -19,9 +19,9 @@ class Camera(Entity):
     """Alters field of view and rendering. Allows to change zoom, and move camera."""
     def __init__(self, renderer, camera_x, camera_y, view_width, view_height):
         self.renderer = renderer
-        self.zoom_id = 4
-        self.ZOOM_VALUES = [0.2, 0.5, 0.75, 0.9, 1.0, 1.1, 1.25, 1.5, 1.8]
-        # default rect used to scale
+        self.ZOOM_VALUES = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.75, 0.9, 1.0, 1.1, 1.25, 1.5, 1.8]
+        self.zoom_id = self.ZOOM_VALUES.index(1.0)
+        # default rect used to scales 
         self._default_rect = pygame.Rect(camera_x, camera_y, view_width, view_height)
         # what camera sees
         self.rect = pygame.Rect(camera_x, camera_y, view_width, view_height)
@@ -44,17 +44,23 @@ class Camera(Entity):
 
     def set_zoom_id(self, zoom_id):
         """Set camera's zoom value (and recalculate rects)."""
+        if zoom_id < 0:
+            raise ValueError("zoom_id cannot be negative.")
         try:
             zoom_value = self.ZOOM_VALUES[zoom_id]
         except IndexError:
-            return
+            raise ValueError("zoom_id out of range")
         self.zoom_id = zoom_id
         w, h = self._default_rect.size
         self.rect.size = (w // zoom_value, h // zoom_value)
         self.tilemap_rect.size = (w * zoom_value, h * zoom_value)
 
     def get_zoom(self):
-        return self.ZOOM_VALUES[self.zoom_id]
+        """Returns true zoom value."""
+        tile_size = 32
+        basic_zoom = self.ZOOM_VALUES[self.zoom_id]
+        true_zoom = int(tile_size * basic_zoom) / tile_size
+        return true_zoom
 
     def normalize_position(self, bound_rect):
         """Shift camera position to fit camera.rect in renderer.DISPLAY_RECT."""

@@ -38,7 +38,6 @@ class ExitGameCommand(Command):
         sys.exit(0)
 
 
-# TODO: It's bugged AF
 class CameraZoomCommand(Command):
     """Zooms camera view by passed zoom parameter.
     zoom_mode can be either '+' or '-'.
@@ -56,7 +55,10 @@ class CameraZoomCommand(Command):
             zoom_change = 1
         else:
             zoom_change = -1
-        cam.set_zoom_id(cam.zoom_id + zoom_change)
+        try:
+            cam.set_zoom_id(cam.zoom_id + zoom_change)
+        except ValueError:
+            return
         self.game.update_state()
 
         x2, y2 = p2 = self.game.client_state.mouse_pos_global
@@ -79,7 +81,7 @@ class CameraCenterCommand(Command):
 
 
 class CameraMoveByCommand(Command):
-    """Moves camera (local) by given vector. Relative map view changes inversely."""
+    """Moves camera (globally) by given vector. Relative map view changes inversely."""
     def execute(self, shift_x, shift_y):
         cam = self.game.renderer.camera
         x, y = cam.rect.topleft
