@@ -4,7 +4,7 @@ import pygame
 from src import controls
 
 def run(game):
-    event_handler = controls.EventHandler(game)
+    evt_handler = controls.EventHandler(game)
     game.renderer.update_tilemap()
     game.add("soldier", (32, 32), image="green_square")
     game.add("soldier", (320, 320), image="blue_square")
@@ -14,5 +14,6 @@ def run(game):
     while not done:
         for event in pygame.event.get():
             done = controls.exit_check(event)
-            event_handler.handle(event)
+            evt_handler.handle(event)
+        game.update_state()
         game.renderer.update()
