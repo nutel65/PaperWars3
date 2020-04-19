@@ -24,6 +24,13 @@
             "request": "launch",
             "program": "server.py",
             "console": "integratedTerminal"
+        },
+        {
+            "name": "CLIENT",
+            "type": "python",
+            "request": "launch",
+            "program": "client.py",
+            "console": "integratedTerminal"
         }
     ]
 }
