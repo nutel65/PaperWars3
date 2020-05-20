@@ -1,5 +1,4 @@
 """All action for single player game."""
-import assets
 import pygame
 from src import controls
 

@@ -1,6 +1,5 @@
 """Implements UI and HUD objects"""
 from src import entities
-from src import commands
 
 class Button(entities.Drawable):
     # TODO: Refactor this class.
