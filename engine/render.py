@@ -3,19 +3,13 @@ import pygame
 import os
 import functools
 import assets
-from engine import utils
+from src import utils
 from src import commands
-from src.entities import Camera
+from engine.camera import Camera2D
 
 
-class Renderer:
-    """Provides methods for rendering entities to screen.
-    public methods:
-        get_window_size() returns (int, int)
-        update()
-        update_tilemap()
-        enqueue_all()
-    """
+class Renderer2D:
+    """2D rendering to screen."""
     def __init__(self):
         os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (650, 30)
         pygame.init()
@@ -42,7 +36,7 @@ class Renderer:
         # array = utils.TilemapFileParser("assets/maps/map1.tm").parse()
         array = utils.TilemapFileParser("assets/maps/calib_map.tm").parse()
         self._tmr = TilemapRenderer(array)
-        self.camera = Camera(self, *self._tmr.render_full().get_rect())
+        self.camera = Camera2D(self, *self._tmr.render_full().get_rect())
 
     def get_window_size(self):
         return (self.WINDOW_WIDTH, self.WINDOW_HEIGHT)

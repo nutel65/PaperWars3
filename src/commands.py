@@ -1,6 +1,6 @@
-"""API to access specific game tasks accesible for user as a command."""
+"""Top level API to execute specific tasks."""
 import sys
-from engine import utils
+from src import utils
 # from src import entities
 
 class Command:
@@ -8,7 +8,7 @@ class Command:
     def __init__(self, game_obj):
         self.game = game_obj
 
-    def execute(self):
+    def execute(self, *args, **kwargs):
         raise NotImplementedError
 
 
@@ -16,20 +16,11 @@ class EntityMoveCommand(Command):
     """Moves entity to destination px."""
     def execute(self, ent, dest_px):
         ent.set_pos_px(dest_px)
-        self.game.renderer.render_request_list.append(ent)
 
 
 class EntityAttackCommand(Command):
     """Causes entity to attack other entity."""
     def execute(self, ent, dest_ent):
-        raise NotImplementedError
-
-
-class ResetGameCommand(Command):
-    """Resets game state."""
-    def execute(self):
-        self.game.entities.clear()
-        # self.game.renderer.camera = entities.Camera()
         raise NotImplementedError
 
 

@@ -1,7 +1,7 @@
 """This module contains functions for handling user input."""
 import pygame
 from src import commands
-from engine import utils
+from src import utils
 
 def pump_events(self):
     pygame.event.pump()

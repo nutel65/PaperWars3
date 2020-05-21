@@ -1,10 +1,10 @@
 """This file imports main engine class 'Game'"""
 import pygame
-from engine import game_socket
 from engine import render
 from src import commands
 from src import state
 from src import entities
+from src import utils
 
 class Game:
     """Main engine class, that connects together other engine pieces.
@@ -25,13 +25,13 @@ class Game:
         self.game_state = state.GameState()
         self.connection_state = state.ConnectionState()
         self.entities = set()
-        self.renderer = render.Renderer()
+        self.renderer = render.Renderer2D()
         self.socket = None
 
     def add(self, entity_type, *args, **kwargs):
         """Easy and convenient way to add new entities."""
         if entity_type == "soldier":
-            ent = entities.Soldier(*args, **kwargs)
+            ent = entities.Sprite(*args, **kwargs)
         elif entity_type == "button":
             raise NotImplementedError
         else:
@@ -56,6 +56,3 @@ class Game:
         # update connection state
         c = self.connection_state
         c.connected = ... # todo: socket's is_connected() method
-
-    def reset():
-        commands.ResetGameCommand(self).execute()
