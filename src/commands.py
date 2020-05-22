@@ -66,7 +66,7 @@ class CameraZoomCommand(Command):
             cam._set_zoom_id(cam.zoom_id + zoom_change)
         except ValueError:
             return
-        self.game.update_state(self.rdr)
+        self.game.update_client_state(self.rdr)
 
         x2, y2 = p2 = self.game.client_state.mouse_pos_global
         diff = (x1 - x2, y1 - y2)
