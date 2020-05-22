@@ -7,26 +7,14 @@ from src import entities
 from src import utils
 
 class Game:
-    """Main engine class, that connects together other engine pieces.
-
-    variables:
-        entities    List of all entities.
-        renderer    Represents game state graphically.
-        state       Aggregation for all usefull information about game state.
-
-    methods:
-        add()       Easy and convenient way to add new entities.
-        reset()     Resets state of game to default settings 
-    """
-    
+    """Main engine class, that connects together other engine pieces."""
     def __init__(self):
         # self.state = state.GameState(self)
         self.client_state = state.ClientState()
         self.game_state = state.GameState()
-        self.connection_state = state.ConnectionState()
+        # self.connection_state = state.ConnectionState()
         self.entities = set()
         self.renderer = render.Renderer2D()
-        self.socket = None
 
     def add(self, entity_type, *args, **kwargs):
         """Easy and convenient way to add new entities."""

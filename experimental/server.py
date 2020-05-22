@@ -1,12 +1,39 @@
 #!/usr/bin/env python3
 
 import socket
+import selectors
+import threading
 from engine import utils
+from collections import deque
 
 HOST = '127.0.0.1'
 PORT = 23232
-active_connections = []
+connections = {
+    
+}
+request_queue = deque()
 
+def id_gen(prefix=""):
+    i = 1
+    while True:
+        yield f"{prefix}{i}"
+        i += 1
+
+game_id_gen = id_gen("G_")
+client_id_gen = id_gen("C_")
+
+
+class GameRoom():
+    def __init__(self):
+        self.id = next(game_id_gen)
+        self.game = ...
+
+class Client():
+    def __init__(self):
+        self.id = next(client_id_gen)
+        
+def process_request(data):
+    ...
 
 def exchange(sock, msg):
     # if len(active_connections) < 2:

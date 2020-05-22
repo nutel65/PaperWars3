@@ -20,7 +20,6 @@ class GameState:
 
 @dataclass
 class ClientState:
-    """State of client app."""
     current_scene = "main_menu"
     last_click_pos = (-100, -100)
     mouse_pos_window = (-100, -100)
@@ -30,12 +29,12 @@ class ClientState:
     camera_pos = (0, 0)
     
 
-@dataclass
-class ConnectionState:
-    connected = False
-    host_ip = None
-    client_ip = None
-    port = "5000"         
+# @dataclass
+# class ConnectionState:
+#     connected = False
+#     host_ip = None
+#     client_ip = None
+#     port = "5000"         
 
     
 

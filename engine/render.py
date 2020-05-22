@@ -14,23 +14,17 @@ class Renderer2D:
         os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (650, 30)
         pygame.init()
         pygame.display.set_caption("PaperWars")
-
         self.MAX_FPS = 60
         self.frame_clock = pygame.time.Clock()
-
         # append directly here in order render object
         self.render_request_list = []
         # holds pieces of screen to be updated
         self.dirty_rects = []
-
         self.WINDOW_WIDTH = 640
         self.WINDOW_HEIGHT = 480
         self.DISPLAY_RECT = pygame.Rect(0, 0, self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
-        # self.DISPLAY_RECT = pygame.Rect(0, 0, self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
-
         self.screen = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
         utils.log("Pygame display initialized")
-
         assets.load_textures()
         # array = utils.TilemapFileParser("assets/maps/test.tm").parse()
         # array = utils.TilemapFileParser("assets/maps/map1.tm").parse()
@@ -52,7 +46,7 @@ class Renderer2D:
         return utils.scale_rect(pygame.Rect(screen_x, screen_y, width, height), self.camera.get_zoom())
 
     def _is_valid_request(self, ent):
-        """Returns True if entity is located in its draw area."""
+        """Returns True if entity is located in draw area."""
         ent_screen_rect = self.get_entity_screen_rect(ent)
         # If ent.MAP_STATIC, then filter out requests which are completely out of self.DISPLAY_RECT
         # else just filter out those that are completely out of self.screen.rect
