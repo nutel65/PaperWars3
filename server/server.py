@@ -1,88 +1,80 @@
 #!/usr/bin/env python3
 
 import socket
-import selectors
 import threading
-import logging
-import sys
+import time
+import utility
+import threadwork
+import config
 from collections import deque
 
-
-# set up logging to file - see previous section for more details
-logging.basicConfig(level=logging.DEBUG,
-                    format='%(asctime)s %(name)-12s %(levelname)-8s %(message)s',
-                    datefmt='%m-%d %H:%M',
-                    filename='./server/logs/lastrun.log',
-                    filemode='w+')
-# define a Handler which writes INFO messages or higher to the sys.stderr
-console = logging.StreamHandler()
-console.setLevel(logging.INFO)
-# set a format which is simpler for console use
-formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
-# tell the handler to use this format
-console.setFormatter(formatter)
-# add the handler to the root logger
-logging.getLogger(__name__).addHandler(console)
-logger = logging.getLogger(__name__)
-
-
-HOST = '127.0.0.1'
-PORT = 23232
-connections = {
-    
-}
-request_queue = deque()
-
-
-def id_gen(prefix=""):
-    i = 1
-    while True:
-        yield f"{prefix}{i}"
-        i += 1
-
-game_id_gen = id_gen("G_")
-client_id_gen = id_gen("C_")
-
+logger = utility.setup_logger()
 
 class GameRoom():
+    game_id_gen = utility.id_gen("G_")
     def __init__(self):
         self.id = next(game_id_gen)
-        self.game = ...
+        self.game_state = ...
+        self.assigned_clients = [None, None]
+
+    def assign_client(client_obj):
+        i = self.assigned_client.index(None)
+        self.assigned_client[i] = client_obj
+        # if both clients are online then start game
+
+    def start_game(self):...
 
 class Client():
+    client_id_gen = utility.id_gen("C_")
     def __init__(self):
         self.id = next(client_id_gen)
-        
-def process_request(data):
-    ...
-
-def exchange(sock, msg):
-    # if len(active_connections) < 2:
-    #     active_connections.append(sock)
-    #     logger.info("Connected")
-    # else:
-    #     logger.info("Refused connection. Maximum client amount reached")
-    logger.info("retrieving data from socket ...")
-    data = sock.recv(1024)
-    logger.info(f"data received: {data}")
-    msg = input("input message:\n>")
-    sock.sendall(bytes(msg, "utf-8"))
-    # active_connections.remove(sock)
+        self.ip_addr = None
+        self.socket = None
+        self.connected = False
+        self.game_room = None
+        self.context = None
     
-
 def main():
+    clients_db = {
+        #client_id: client_object,
+    }
+    
     print(socket.gethostname())
-    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
-        s.bind((HOST, PORT))
-        s.listen()
-        logger.info(f"Running socket: {HOST}:{PORT}")
-        while True:
-            logger.info("Waiting for client...")
-            client1, addr = s.accept()
-            logger.info(f"Connecting with client ({addr[0]})")
-            while True:
-                exchange(client1, "xd")
-            # client1.close()
+    listening_sock = socket.socket(
+        family=socket.AF_INET, 
+        type=socket.SOCK_STREAM) # | socket.SOCK_NONBLOCK)
+    listening_sock.bind((config.SERVER_IP, config.SERVER_PORT))
+    listening_sock.listen()
+    logger.info(f"Server running at: {config.SERVER_IP}:{config.SERVER_PORT}")
+
+    # INIT THREADS
+    unassigned_clients_list = []
+    client_sockets = []
+
+    doorman = threading.Thread(
+        target=threadwork.accept_clients, 
+        args=(listening_sock, unassigned_clients_list),
+        daemon=True)
+    doorman.start()
+
+    data_receiver = threading.Thread(
+        target=threadwork.message_reveiver, 
+        args=(client_sockets,),
+        daemon=True)
+    data_receiver.start()
+
+    input_handler = threading.Thread(
+        target=threadwork.cli_input_handler,
+        daemon=True)
+    input_handler.start()
+
+    while True:
+        if not unassigned_clients_list:
+            time.sleep(1)
+        else:
+            print(unassigned_clients_list)
+            client_sockets.append(unassigned_clients_list.pop()[0])
+    listening_sock.close()
 
 if __name__ == "__main__":
     main()
