@@ -6,26 +6,33 @@ import time
 
 
 def connect_to_server(host, port):
-    s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+    sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     try:
-        s.connect((host, port))
+        sock.connect((host, port))
     except socket.error:
         print(f"Cannot establish connection with {host}:{port}")
         return
     print("Connected")
     msg = input("send message:\n> ")
-    s.sendall(bytes(msg, "utf-8"))
+    sock.sendall(bytes(msg, "utf-8"))
     print("message sent, waiting for reply...")
+    print("experimental: settimeout = 5")
     sock.settimeout(5.0)
-    data = sock.recv(1024)
+    try:
+        data = sock.recv(1024)
+    except socket.timeout:
+        print("no reply from server")
+    finally:
+        print("received", data)
     sock.settimeout(None)
-    print("received", data)
+    return sock
     
 
 if __name__ == "__main__":
     HOST = '127.0.0.1'
     PORT = 23232
     sock = connect_to_server(HOST, PORT)
-    sock.close()
-    print("closed connection")
-    time.wait(5)
+    if sock:
+        sock.close()
+        print("closed connection")
+        time.wait(1)

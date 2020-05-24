@@ -25,19 +25,21 @@ class GameRoom():
     def start_game(self):...
 
 class Client():
-    client_id_gen = utility.id_gen("C_")
-    def __init__(self):
-        self.id = next(client_id_gen)
-        self.ip_addr = None
-        self.socket = None
-        self.connected = False
-        self.game_room = None
+    # client_id_gen = utility.id_gen("C_")
+    def __init__(self, socket, ip_addr):
+        # self.id = next(client_id_gen)
+        self.socket = socket
+        self.ip_addr = ip_addr
+        self.gameroom_id = None
         self.context = None
+
+    def save_to_database(database):
+        ...
     
 def main():
-    clients_db = {
-        #client_id: client_object,
-    }
+    # clients_db = {
+    #     #client_id: client_object,
+    # }
     
     print(socket.gethostname())
     listening_sock = socket.socket(
@@ -49,31 +51,37 @@ def main():
 
     # INIT THREADS
     unassigned_clients_list = []
-    client_sockets = []
-
-    doorman = threading.Thread(
+    active_clients = []
+    services = {}
+    
+    services["doorman"] = threading.Thread(
         target=threadwork.accept_clients, 
         args=(listening_sock, unassigned_clients_list),
         daemon=True)
-    doorman.start()
+    services["doorman"].start()
 
-    data_receiver = threading.Thread(
+    services["data_receiver"] = threading.Thread(
         target=threadwork.message_reveiver, 
-        args=(client_sockets,),
+        args=(active_clients,),
         daemon=True)
-    data_receiver.start()
+    services["data_receiver"].start()
 
-    input_handler = threading.Thread(
+
+    services["dbmanager"] = threadwork.DBManager()
+    services["dbmanager"].start()
+    
+    services["input_handler"] = threading.Thread(
         target=threadwork.cli_input_handler,
+        args=(services, active_clients),
         daemon=True)
-    input_handler.start()
+    services["input_handler"].start()
 
     while True:
         if not unassigned_clients_list:
             time.sleep(1)
         else:
             print(unassigned_clients_list)
-            client_sockets.append(unassigned_clients_list.pop()[0])
+            active_clients.append(unassigned_clients_list.pop())
     listening_sock.close()
 
 if __name__ == "__main__":
