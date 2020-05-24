@@ -1,7 +1,8 @@
-05-24 13:34 server       INFO     Server running at: 127.0.0.1:23232
-05-24 13:34 server       INFO     Doorman thread started. Waiting for client...
-05-24 13:34 server       INFO     Receiver thread started. Waiting for data from clients...
-05-24 13:34 server       INFO     DBManager service started.
-05-24 13:34 server       INFO     Connected with client (127.0.0.1)
-05-24 13:34 server       INFO     data received
-05-24 13:35 server       INFO     Client disconnected (('127.0.0.1', 52112))
+05-24 13:53 server       INFO     Server running at: 127.0.0.1:23232
+05-24 13:53 server       INFO     Doorman thread started. Waiting for client...
+05-24 13:53 server       INFO     Receiver thread started. Waiting for data from clients...
+05-24 13:53 server       INFO     DBManager service started.
+05-24 13:53 server       INFO     Connected with client (127.0.0.1:52291)
+05-24 13:53 server       INFO     (0)(127.0.0.1:52291) => b'dfg'
+05-24 13:53 server       INFO     Client disconnected (127.0.0.1:52291)
+05-24 13:54 server       INFO     exit command execute; stopping services

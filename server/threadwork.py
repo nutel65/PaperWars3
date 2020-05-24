@@ -14,24 +14,23 @@ def accept_clients(sock, client_list):
     while True:
         client_sock, addr = sock.accept()
         client_list.append((client_sock, addr))
-        logger.info(f"Connected with client ({addr[0]})")
+        logger.info(f"Connected with client ({addr[0]}:{addr[1]})")
 
 def message_reveiver(clients):
-    # TODO: multiplexing clients_list using selectors
     logger.info("Receiver thread started. Waiting for data from clients...")
     while True:
+        # TODO: multiplexing clients list using selectors
         if clients:
             client_num = 0
             client_sock = clients[client_num][0]
-            client_addr = clients[client_num][1]
+            addr = clients[client_num][1]
             data = client_sock.recv(1024)
             if not data:
-                logger.info(f"Client disconnected ({client_addr})")
+                logger.info(f"Client disconnected ({addr[0]}:{addr[1]})")
                 client_sock.close()
                 clients.pop(client_num)
                 continue
-            logger.info(f"data received")
-            print(f"client message: {data}")
+            logger.info(f"({client_num})({addr[0]}:{addr[1]}) => {data}")
         else:
             time.sleep(1)
 

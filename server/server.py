@@ -80,7 +80,6 @@ def main():
         if not unassigned_clients_list:
             time.sleep(1)
         else:
-            print(unassigned_clients_list)
             active_clients.append(unassigned_clients_list.pop())
     listening_sock.close()
 
