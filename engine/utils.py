@@ -1,11 +1,14 @@
 """Commonly used utilities, tools and other code,
 that is used often but didn't fit anywhere else.
 """
+import sys
 import os
 import pygame
 import numpy
 import functools
 from datetime import datetime
+from src import entities
+from pygame.locals import QUIT, KEYDOWN, K_ESCAPE
 
 
 # def index_to_px(index, shift=(0, 0)):

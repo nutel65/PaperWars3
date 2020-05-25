@@ -4,6 +4,7 @@ should implements one of classes included in this module.
 import assets
 import pygame
 from engine import utils
+from src import commands
 
 class Entity():
     """Represents any game object"""
