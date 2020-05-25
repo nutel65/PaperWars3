@@ -16,15 +16,14 @@ def connect_to_server(host, port):
     msg = input("send message:\n> ")
     sock.sendall(bytes(msg, "utf-8"))
     print("message sent, waiting for reply...")
-    print("experimental: settimeout = 5")
-    sock.settimeout(5.0)
-    try:
-        data = sock.recv(1024)
-    except socket.timeout:
-        print("no reply from server")
-    finally:
-        print("received", data)
-    sock.settimeout(None)
+    # print("experimental: settimeout = 5")
+    # sock.settimeout(5.0)
+    # try:
+    data = sock.recv(1024)
+    print("received", data)
+    # except socket.timeout:
+    #     print("no reply from server")
+    # sock.settimeout(None)
     return sock
     
 
