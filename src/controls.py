@@ -1,7 +1,7 @@
 """This module contains functions for handling user input."""
 import pygame
 from src import commands
-from engine import utils
+from src import utils
 
 def pump_events(self):
     pygame.event.pump()
@@ -16,14 +16,15 @@ def exit_check(event):
 
 
 class EventHandler():
-    def __init__(self, game):
+    def __init__(self, game, renderer):
+        self.renderer = rdr = renderer
         self.game = game
-        self.exit_game = commands.ExitGameCommand(game)
-        self.zoom_in = commands.CameraZoomCommand(game, '+')
-        self.zoom_out = commands.CameraZoomCommand(game, '-')
+        self.exit_game = commands.ExitGameCommand(game, rdr)
+        self.zoom_in = commands.CameraZoomCommand(game, rdr, '+')
+        self.zoom_out = commands.CameraZoomCommand(game, rdr, '-')
         # self.reset_zoom = commands.CameraZoomCommand(game, 1.0)
-        self.camera_move_by = commands.CameraMoveByCommand(game)
-        self.camera_center = commands.CameraCenterCommand(game)
+        self.camera_move_by = commands.CameraMoveByCommand(game, rdr)
+        self.camera_center = commands.CameraCenterCommand(game, rdr)
 
     def handle(self, event):
         if event.type == pygame.KEYDOWN:
@@ -51,8 +52,6 @@ class EventHandler():
             self.camera_move_by.execute(0, 32)
 
         if event.key == pygame.K_RETURN:
-            # renderer = self.game.renderer
-            # map_center = utils.local_to_global(renderer, renderer.camera.tilemap_rect.center)
             self.camera_center.execute()
 
     def _handle_mouse_click(self, event):

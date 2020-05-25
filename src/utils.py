@@ -93,7 +93,7 @@ def local_to_global(renderer, local_pos):
     global_y = (local_pos[1] + renderer.camera.rect.y) / zoom + renderer.DISPLAY_RECT.y
     ## DEBUG:
     # ent = next(iter(game.entities))
-    # game.renderer.global.blit(ent.image, (global_x, global_y))
+    # renderer.global.blit(ent.image, (global_x, global_y))
     # pygame.display.flip()
     return (global_x, global_y)
 
@@ -109,7 +109,7 @@ def global_to_local(renderer, global_pos):
 
 
 def log(msg="", type="Info", time=True, output=print):
-    """Pass a message to given output (output is function)."""
+    """Pass a message to given output function."""
     t = ""
     if time:
         t = datetime.now().strftime("%H:%M:%S:%f")[:-3]

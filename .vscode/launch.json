@@ -22,14 +22,14 @@
             "name": "SERVER",
             "type": "python",
             "request": "launch",
-            "program": "server.py",
-            "console": "integratedTerminal"
+            "program": "server/server.py",
+            "console": "externalTerminal"
         },
         {
             "name": "CLIENT",
             "type": "python",
             "request": "launch",
-            "program": "client.py",
+            "program": "experimental/client.py",
             "console": "integratedTerminal"
         }
     ]

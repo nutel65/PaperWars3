@@ -3,46 +3,36 @@ import pygame
 import os
 import functools
 import assets
-from engine import utils
+from src import utils
 from src import commands
-from src.entities import Camera
+from engine.camera import Camera2D
 
 
-class Renderer:
-    """Provides methods for rendering entities to screen.
-    public methods:
-        get_window_size() returns (int, int)
-        update()
-        update_tilemap()
-        enqueue_all()
-    """
-    def __init__(self):
+class Renderer2D:
+    """2D rendering to screen."""
+    def __init__(self, entities_list):
+        self.entities_list = entities_list
         os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (650, 30)
         pygame.init()
         pygame.display.set_caption("PaperWars")
-
         self.MAX_FPS = 60
         self.frame_clock = pygame.time.Clock()
-
         # append directly here in order render object
         self.render_request_list = []
         # holds pieces of screen to be updated
         self.dirty_rects = []
-
         self.WINDOW_WIDTH = 640
         self.WINDOW_HEIGHT = 480
         self.DISPLAY_RECT = pygame.Rect(0, 0, self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
-        # self.DISPLAY_RECT = pygame.Rect(0, 0, self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
-
         self.screen = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
         utils.log("Pygame display initialized")
-
         assets.load_textures()
         # array = utils.TilemapFileParser("assets/maps/test.tm").parse()
         # array = utils.TilemapFileParser("assets/maps/map1.tm").parse()
         array = utils.TilemapFileParser("assets/maps/calib_map.tm").parse()
         self._tmr = TilemapRenderer(array)
-        self.camera = Camera(self, *self._tmr.render_full().get_rect())
+        self.camera = Camera2D(self, *self._tmr.render_full().get_rect())
+        self.enqueue_all()
 
     def get_window_size(self):
         return (self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
@@ -57,8 +47,8 @@ class Renderer:
         width, height = ent.rect.size
         return utils.scale_rect(pygame.Rect(screen_x, screen_y, width, height), self.camera.get_zoom())
 
-    def _is_valid_request(self, ent):
-        """Returns True if entity is located in its draw area."""
+    def _in_render_area(self, ent):
+        """Returns True if entity is located in draw area."""
         ent_screen_rect = self.get_entity_screen_rect(ent)
         # If ent.MAP_STATIC, then filter out requests which are completely out of self.DISPLAY_RECT
         # else just filter out those that are completely out of self.screen.rect
@@ -94,7 +84,7 @@ class Renderer:
         Call this at the end of main loop.
         """ 
         # Filter out redundant entities.
-        self.render_request_list = list(filter(self._is_valid_request, self.render_request_list))
+        self.render_request_list = list(filter(self._in_render_area, self.render_request_list))
 
         # sort render_request_list to preserve proper order of rendering
         self.render_request_list.sort(key=lambda x: x.RENDER_PRIORITY, reverse=True)
@@ -113,11 +103,13 @@ class Renderer:
         self.dirty_rects.clear()
         self.frame_clock.tick(self.MAX_FPS)
     
-    def enqueue_all(self, iterable):
+    def enqueue_all(self, entities_list=None):
         """Add all entities to render_request_list from iterable."""
-        self.render_request_list.extend(iterable)
+        if not entities_list:
+            entities_list = self.entities_list
+        self.render_request_list.extend(entities_list)
 
-    def update_tilemap(self):
+    def redraw_tilemap(self):
         x, y = self.camera.rect.topleft
         width, height = self.DISPLAY_RECT.size
         tmprect = pygame.Rect(x, y, width, height)
@@ -125,11 +117,14 @@ class Renderer:
         self.background = self._tmr.render_full(scale=self.camera.get_zoom())
         self.screen.blit(self.background, self.DISPLAY_RECT, tmprect)
         self.dirty_rects.append(self.DISPLAY_RECT)
-        utils.log("RENDERER: Rendered tilemap")
+        # utils.log("RENDERER: Rendered tilemap")
+
+    def update_all(self):
+        self.redraw_tilemap()
+        self.enqueue_all()
 
 
 class TilemapRenderer():
-    """Provides methods for rendering tilemaps."""
     def __init__(self, tilemap_array):
         self._tilemap_array = tilemap_array
 
@@ -154,8 +149,3 @@ class TilemapRenderer():
 
     def render_area(self, rect):
         raise NotImplementedError
-
-
-# decorator?
-def grid_snap():
-    ...

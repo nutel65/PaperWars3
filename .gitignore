@@ -3,3 +3,4 @@
 __pycache__
 test2.py
 .pytest_cache
+server/logs/*
