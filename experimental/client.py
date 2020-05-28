@@ -2,7 +2,17 @@
 
 import socket
 import time
+import binascii
 # from engine import utils
+
+def send(sock, data):
+    ...
+
+def handshake(sock, version):
+    major = binascii.a2b_hex(format(version[0], '02x'))
+    minor = binascii.a2b_hex(format(version[1], '02x'))
+    patch = binascii.a2b_hex(format(version[2], '02x'))
+    sock.sendall(major + minor + patch)
 
 
 def connect_to_server(host, port):
@@ -14,16 +24,12 @@ def connect_to_server(host, port):
         return
     print("Connected")
     msg = input("send message:\n> ")
-    sock.sendall(bytes(msg, "utf-8"))
-    print("message sent, waiting for reply...")
-    # print("experimental: settimeout = 5")
-    # sock.settimeout(5.0)
-    # try:
+
+    handshake(sock, [1, 0, 0])
+
+    print("handshake sent, waiting for reply...")
     data = sock.recv(1024)
     print("received", data)
-    # except socket.timeout:
-    #     print("no reply from server")
-    # sock.settimeout(None)
     return sock
     
 
@@ -34,4 +40,4 @@ if __name__ == "__main__":
     if sock:
         sock.close()
         print("closed connection")
-        time.wait(1)
+        time.sleep(1)

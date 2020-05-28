@@ -1,7 +1,9 @@
 import api
+import config
 import logging
 import selectors
 import servercli
+import statuscode
 import threading
 import time
 import traceback
@@ -14,6 +16,15 @@ class ThreadWorker(threading.Thread):
         threading.Thread.__init__(self)
         self.exitflag = 0
         self.name = "ThreadWorker"
+        self.daemon = False
+
+    def wrap_run():
+        pass
+
+    def run(self):
+        logger.info(f"{self.name} service started.")
+        self.wrap_run()
+        logger.info(f"{self.name} service stopped.")
 
     def stop(self):
         self.exitflag = 1
@@ -28,34 +39,6 @@ class ThreadWorker(threading.Thread):
         self.join(timeout=0.0)
         return self.is_alive()
 
-def accept_clients(listening_sock, client_list, selector):
-    logger.info("Doorman thread started. Waiting for client...")
-    while True:
-        client_sock, addr = listening_sock.accept()
-        client_sock.setblocking(False)
-        client_list.append((client_sock, addr))
-        events = selectors.EVENT_READ | selectors.EVENT_WRITE
-        # data param sets if user is logged
-        selector.register(client_sock, events, data="unlogged") 
-        logger.info(f"Client connected ({addr[0]}:{addr[1]})")
-
-# def message_reveiver(clients):
-#     logger.info("DataReceiver thread started.")
-#     while True:
-#         # TODO: multiplexing clients list using selectors
-#         if clients:
-#             client_num = 0
-#             client_sock = clients[client_num][0]
-#             addr = clients[client_num][1]
-#             data = client_sock.recv(1024)
-#             if not data:
-#                 logger.info(f"Client disconnected ({addr[0]}:{addr[1]})")
-#                 client_sock.close()
-#                 clients.pop(client_num)
-#                 continue
-#             logger.info(f"({client_num})({addr[0]}:{addr[1]}) => {data}")
-#         else:
-#             time.sleep(1)
 
 class PacketReceiver(ThreadWorker):
     def __init__(self, selector):
@@ -64,76 +47,69 @@ class PacketReceiver(ThreadWorker):
         self.name = "PacketReceiver"
         self.selector = selector
         
-    def run(self):
+    def wrap_run(self):
         # TODO: multiplexing clients list using selectors
-        logger.info(f"{self.name} service started.")
-        while True:
-            # FIXME: wmpty selector throws exception on windows
-            events = self.selector.select(timeout=None)
+        while not self.exitflag:
+            # FIXME: select on empty selector throws exception on windows
+            # print("blocked", end="\n\n")
+            events = self.selector.select(timeout=config.SELECTOR_TIMEOUT)
             for key, mask in events:
-                if key.data == "logged":
-                    handle_logged(key, mask)
-                elif key.data == "unlogged":
-                    handle_unlogged(key)
+                print("events:", events)
+                if key.data["type"] == "logged":
+                    self.handle_logged(key, mask)
+                elif key.data["type"] == "unlogged":
+                    self.handle_unlogged(key)
+                elif key.data["type"] == "listener":
+                    self.accept_client(key)
                 else:
-                    raise ValueError("Register data is neither 'logged' nor 'unlogged'")
+                    raise ValueError(f"Invalid register type: {key.data['type']}")
+            
+    def accept_client(self, key):
+        listening_sock = key.fileobj
+        client_sock, addr = listening_sock.accept()
+        client_sock.setblocking(False)
+        events = selectors.EVENT_READ #| selectors.EVENT_WRITE
+        self.selector.register(client_sock, events, data={"type": "unlogged"})
+        logger.info(f"Client connected ({addr[0]}:{addr[1]})")
 
-            # if self.unlogged:
-
-
-
-            #     client_num = 0
-            #     client_sock = self.unlogged[client_num][0]
-            #     addr = self.unlogged[client_num][1]
-            #     data = client_sock.recv(1024)
-            #     if not data:
-            #         logger.info(f"Client disconnected ({addr[0]}:{addr[1]})")
-            #         client_sock.close()
-            #         self.unlogged.pop(client_num)
-            #         continue
-            #     logger.info(f"({client_num})({addr[0]}:{addr[1]}) => {data}")
-            # else:
-            #     time.sleep(1)
-
-    def handle_unlogged(self, register):
-        sock = register.fileobj
+    def handle_unlogged(self, key):
+        sock = key.fileobj
         packet = sock.recv(4096)
+        print(packet)
         status = api.handshake(packet, sock)
-        if status == 128:
-            register.data = "logged"
+        if status == statuscode.HANDSHAKE_OK:
+            key.data["type"] = "logged"
         else:
             self.selector.unregister(sock)
             sock.close()
-        logger.info(f"{status} {config.SERVER_CODES[status]}")
+        logger.info(f"{status}")
 
-    def handle_logged(self, register):
+    def handle_logged(self, key, mask):
         print("handle_logged not implemented, disconnecting...")
-        sock = register.fileobj
+        sock = key.fileobj
         self.selector.unregister(sock)
         sock.close()
 
-    def stop(self):
-        self.exitflag = 1
-        if self.query_queue:
-            logger.info(f"{self.name}: waiting for finishing pending queries...")
+    def get_handles(self):
+        handles = dict(self.selector.get_map())
+        print("HANDLES LIST:")
+        for key, h in handles.items():
+            print(f"[{key}: data={h.data} events={h.events}]")
 
-    def query(self, query_string):
-        if self.exitflag:
-            logger.error(f"{self.name} stopped; Could not add new query")
-            return
-        if not query_string:
-            print("query string cannot be empty")
-        self.query_queue.append(query_string)
 
-def cli_input_handler(services_list, active_sockets_list):
-    servercli.set_services(services_list)
-    servercli.set_active_sockets(active_sockets_list)
-    while True:
-        try:
-            inp = input()
-            servercli.exe(inp)
-        except:
-            logger.critical(f"An error occured during command execution:\n{traceback.format_exc()}")
+class CLIService(ThreadWorker):
+    def __init__(self):
+        ThreadWorker.__init__(self)
+        self.name = "CLI"
+
+    def wrap_run(self):
+        while not self.exitflag:
+            try:
+                inp = input()
+                servercli.exe(inp)
+            except:
+                logger.error(f"An error occured during command execution:\n{traceback.format_exc()}")
+
 
 class DBManager(ThreadWorker):
     def __init__(self, database=None):
@@ -142,8 +118,7 @@ class DBManager(ThreadWorker):
         self.query_queue = deque()
         self.name = "DBManager"
 
-    def run(self):
-        logger.info(f"{self.name} service started.")
+    def wrap_run(self):
         while not self.exitflag or self.query_queue:
             if self.query_queue:
                 ...
@@ -152,7 +127,7 @@ class DBManager(ThreadWorker):
                 print(self.query_queue.popleft())
             else:
                 time.sleep(1)
-        logger.info(f"{self.name} service stopped.")
+
     def stop(self):
         self.exitflag = 1
         if self.query_queue:

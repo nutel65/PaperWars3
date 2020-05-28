@@ -1,7 +1,9 @@
 #!/usr/bin/env python3
 
 import config
+import random
 import selectors
+import servercli
 import socket
 import threading
 import threadwork
@@ -35,55 +37,46 @@ class Client():
         self.context = None
     
 def main():
-    # clients_db = {
-    #     #client_id: client_object,
-    # }
-    
     print(socket.gethostname())
     listening_sock = socket.socket(
         family=socket.AF_INET, 
-        type=socket.SOCK_STREAM) # | socket.SOCK_NONBLOCK)
+        type=socket.SOCK_STREAM)
+    listening_sock.setblocking(False)
     listening_sock.bind((config.SERVER_IP, config.SERVER_PORT))
     listening_sock.listen()
     logger.info(f"Server running at: {config.SERVER_IP}:{config.SERVER_PORT}")
 
-    # unassigned_clients_list = []
-    unlogged_clients = []
-    logged_clients = {}
     services = {}
     selector = selectors.DefaultSelector()
+    selector.register(listening_sock, selectors.EVENT_READ, data={"type": "listener"})
     
     # INIT THREADS
-    services["doorman"] = threading.Thread(
-        target=threadwork.accept_clients, 
-        args=(listening_sock, unlogged_clients, selector),
-        daemon=True)
-    services["doorman"].start()
-
-    # services["packet_receiver"] = threading.Thread(
-    #     target=threadwork.message_reveiver, 
-    #     args=(unlogged_clients,),
+    # services["doorman"] = threading.Thread(
+    #     target=threadwork.accept_clients, 
+    #     args=(listening_sock, selector),
     #     daemon=True)
-    # services["packet_receiver"].start()
-    services["packet_receiver"] = threadwork.PacketReceiver(selector)
-    services["packet_receiver"].start()
+    # services["doorman"].start()
+
+    services["packrec"] = threadwork.PacketReceiver(selector)
+    services["packrec"].start()
 
     services["dbmanager"] = threadwork.DBManager("db_here")
     services["dbmanager"].start()
     
-    services["input_handler"] = threading.Thread(
-        target=threadwork.cli_input_handler,
-        args=(services, unlogged_clients),
-        daemon=True)
-    services["input_handler"].start()
+    services["cli"] = threadwork.CLIService()
+    servercli.set_services(services)
+    services["cli"].start()
 
     while True:
-        time.sleep(5)
-        print(map(selector.get_map()))
-        # if not unassigned_clients_list:
-        #     time.sleep(1)
-        # else:
-        #     unlogged_clients.append(unassigned_clients_list.pop())
+        keys = list(services.keys())
+        try:
+            k = random.choice(keys)
+        except:
+            break
+        services[k].join()
+        services.pop(k)
+
+    print("all services stopped")
     listening_sock.close()
 
 if __name__ == "__main__":

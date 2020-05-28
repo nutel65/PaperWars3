@@ -1,3 +1,6 @@
-05-25 23:09 server       INFO     Server running at: 127.0.0.1:23232
-05-25 23:09 server       INFO     Doorman thread started. Waiting for client...
-05-25 23:09 server       INFO     PacketReceiver service started.
+05-28 22:58 server       INFO     Server running at: 127.0.0.1:23232
+05-28 22:58 server       INFO     PacketReceiver service started.
+05-28 22:58 server       INFO     DBManager service started.
+05-28 22:58 server       INFO     CLI service started.
+05-28 22:58 server       INFO     Client connected (127.0.0.1:54261)
+05-28 22:59 server       INFO     128
