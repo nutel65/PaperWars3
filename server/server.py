@@ -11,7 +11,7 @@ import time
 import utility
 from collections import deque
 
-logger = utility.setup_logger()
+logger = utility.setup_logger("server")
 
 class GameRoom():
     game_id_gen = utility.id_gen("G_")

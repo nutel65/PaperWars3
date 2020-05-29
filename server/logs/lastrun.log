@@ -1,6 +1,8 @@
-05-28 22:58 server       INFO     Server running at: 127.0.0.1:23232
-05-28 22:58 server       INFO     PacketReceiver service started.
-05-28 22:58 server       INFO     DBManager service started.
-05-28 22:58 server       INFO     CLI service started.
-05-28 22:58 server       INFO     Client connected (127.0.0.1:54261)
-05-28 22:59 server       INFO     128
+05-29 22:57 server       INFO     Server running at: 127.0.0.1:23232
+05-29 22:57 server       INFO     PacketReceiver service started.
+05-29 22:57 server       INFO     DBManager service started.
+05-29 22:57 server       INFO     CLI service started.
+05-29 22:57 server       INFO     Client connected (127.0.0.1:50346)
+05-29 22:57 server       INFO     128
+05-29 22:57 server       INFO     Closed connection with <socket.socket [closed] fd=-1, family=AddressFamily.AF_INET, type=SocketKind.SOCK_STREAM, proto=0>
+05-29 23:00 server       WARNING  exitf command execute; force stopped

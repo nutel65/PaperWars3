@@ -7,6 +7,7 @@ import statuscode
 import threading
 import time
 import traceback
+import utility
 from collections import deque
 
 logger = logging.getLogger("server")
@@ -74,7 +75,7 @@ class PacketReceiver(ThreadWorker):
 
     def handle_unlogged(self, key):
         sock = key.fileobj
-        packet = sock.recv(4096)
+        packet = sock.recv(config.RECV_SIZE)
         print(packet)
         status = api.handshake(packet, sock)
         if status == statuscode.HANDSHAKE_OK:
@@ -85,10 +86,35 @@ class PacketReceiver(ThreadWorker):
         logger.info(f"{status}")
 
     def handle_logged(self, key, mask):
-        print("handle_logged not implemented, disconnecting...")
         sock = key.fileobj
-        self.selector.unregister(sock)
-        sock.close()
+        key.data["data"] = b""
+        packet = sock.recv(config.RECV_SIZE)
+        if not packet:
+            self.selector.unregister(sock)
+            sock.close()
+            logger.info(f"Closed connection with client")
+            return
+        try:
+            head = packet[:5]
+        except IndexError:
+            logger.warning(f"Invalid header in packet: {packet}")
+            return
+        total_length, pack_id, status = utility.parsehead(head)
+        key.data["data"] += packet[5:]
+        while len(key.data["data"]) < total_length:
+            packet = sock.recv(config.RECV_SIZE)
+            if not packet:
+                self.selector.unregister(sock)
+                sock.close()
+                logger.info(f"CONNECTION_LOST")
+                return
+            else:
+                key.data["data"] += packet
+                logger.debug(f"Additional packet received: {packet}")
+        if key.data["data"] < total_length:
+
+            print("TODO: HANDLE LOGGED")
+
 
     def get_handles(self):
         handles = dict(self.selector.get_map())

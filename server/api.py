@@ -1,7 +1,6 @@
 import logging
 import statuscode
-import binascii
-
+import utility
 
 logger = logging.getLogger("server")
 
@@ -9,16 +8,13 @@ logger = logging.getLogger("server")
 # Next 1 byte is the request ID. (0-255)
 # Next 1 byte is the status code. (0-255)
 
-def pack(status, data):
-    ...
 
-
-def unpack(sock):
-    packet = sock.recv(4096)
-    data_len = int(packet[0])
-    status = int(packet[1])
-    data = int(packet[2:])
-    return status, data
+# def unpack(sock):
+#     packet = sock.recv(4096)
+#     data_len = int(packet[0])
+#     status = int(packet[1])
+#     data = int(packet[2:])
+#     return status, data
 
 
 def handshake(packet, client_sock):
@@ -34,16 +30,5 @@ def handshake(packet, client_sock):
         patch = packet[2]
         print(f"Client version {major}.{minor}.{patch}")
         status = statuscode.HANDSHAKE_OK
-        data = binascii.a2b_hex(format(status, '02x'))
-        client_sock.sendall(data)
+        client_sock.sendall(utility.int_to_bhex(status))
     return status
-    
-    
-
-
-# def send(client):...
-# # def callback_request():...
-# def broadcast():...
-# def send_deltas(n, client):...
-#     """send n number of last game events to the client"""
-
