@@ -1,6 +1,7 @@
 import api
 import config
 import logging
+import msgpack
 import selectors
 import servercli
 import statuscode
@@ -42,85 +43,88 @@ class ThreadWorker(threading.Thread):
 
 
 class PacketReceiver(ThreadWorker):
+    # TODO: extract logged and unlogged methods out of class
     def __init__(self, selector):
         ThreadWorker.__init__(self)
-        self.query_queue = deque()
         self.name = "PacketReceiver"
         self.selector = selector
         
     def wrap_run(self):
-        # TODO: multiplexing clients list using selectors
         while not self.exitflag:
-            # FIXME: select on empty selector throws exception on windows
-            # print("blocked", end="\n\n")
+            # select sockets with incoming data
             events = self.selector.select(timeout=config.SELECTOR_TIMEOUT)
             for key, mask in events:
-                print("events:", events)
-                if key.data["type"] == "logged":
-                    self.handle_logged(key, mask)
+                logger.debug(f"selected {key.data}")
+                if key.data["type"] == "listener":
+                    self.accept_client(key)
+                elif key.data["type"] == "no_handshake":
+                    self.handshake_client(key)
                 elif key.data["type"] == "unlogged":
                     self.handle_unlogged(key)
-                elif key.data["type"] == "listener":
-                    self.accept_client(key)
+                elif key.data["type"] == "logged":
+                    self.handle_logged(key, mask)
                 else:
                     raise ValueError(f"Invalid register type: {key.data['type']}")
             
     def accept_client(self, key):
+        """Accept incoming connection and and register him in selector."""
         listening_sock = key.fileobj
         client_sock, addr = listening_sock.accept()
         client_sock.setblocking(False)
         events = selectors.EVENT_READ #| selectors.EVENT_WRITE
-        self.selector.register(client_sock, events, data={"type": "unlogged"})
+        self.selector.register(client_sock, events, 
+            data={
+                "type": "no_handshake",
+                "ip": addr[0],
+                "port": addr[1],
+                "data": b"",
+                })
         logger.info(f"Client connected ({addr[0]}:{addr[1]})")
 
-    def handle_unlogged(self, key):
+
+    def handshake_client(self, key):
         sock = key.fileobj
         packet = sock.recv(config.RECV_SIZE)
         print(packet)
         status = api.handshake(packet, sock)
         if status == statuscode.HANDSHAKE_OK:
-            key.data["type"] = "logged"
+            key.data["type"] = "unlogged"
         else:
             self.selector.unregister(sock)
             sock.close()
         logger.info(f"{status}")
+    
 
-    def handle_logged(self, key, mask):
-        sock = key.fileobj
-        key.data["data"] = b""
-        packet = sock.recv(config.RECV_SIZE)
-        if not packet:
-            self.selector.unregister(sock)
-            sock.close()
-            logger.info(f"Closed connection with client")
+    def handle_unlogged(self, key):
+        """Handle unlogged client which should
+        try to log in or register at this point"""
+        code = utility.fetch(key, self.selector)
+        if code == -1:
             return
         try:
-            head = packet[:5]
-        except IndexError:
-            logger.warning(f"Invalid header in packet: {packet}")
+            pack_id, status, data = utility.lastpack(key)
+        except ValueError as e:
+            # BUG: valueerror from unpack(b) get caught unncessary%
+            logger.warning(e)
+        logger.debug(f"received: \npack_id: {pack_id}\nstatus: {status}\ndata: {data}")
+        # TODO: add api for logging in and register
+        # api.log_in()
+        
+
+    def handle_logged(self, key, mask):
+        """Handled client is logged at this point,
+        and can send any valid api request."""
+        code = utility.fetch(key, self.selector)
+        if code == -1:
             return
-        total_length, pack_id, status = utility.parsehead(head)
-        key.data["data"] += packet[5:]
-        while len(key.data["data"]) < total_length:
-            packet = sock.recv(config.RECV_SIZE)
-            if not packet:
-                self.selector.unregister(sock)
-                sock.close()
-                logger.info(f"CONNECTION_LOST")
-                return
-            else:
-                key.data["data"] += packet
-                logger.debug(f"Additional packet received: {packet}")
-        if key.data["data"] < total_length:
-
-            print("TODO: HANDLE LOGGED")
-
-
-    def get_handles(self):
-        handles = dict(self.selector.get_map())
-        print("HANDLES LIST:")
-        for key, h in handles.items():
-            print(f"[{key}: data={h.data} events={h.events}]")
+        try:
+            pack_id, status, data = utility.lastpack(key)
+        except ValueError as e:
+            logger.warning(e)
+        else:
+            logger.debug(f"received: \npack_id: {pack_id}\nstatus: {status}\ndata: {data}")
+            # TODO: add api for logged user
+            api.handle(key, pack_id, status)
 
 
 class CLIService(ThreadWorker):
@@ -149,7 +153,7 @@ class DBManager(ThreadWorker):
             if self.query_queue:
                 ...
                 # TODO: Add real database.
-                # database.query(query_queue.popleft())
+                # database.query(query_queue.popleft()) 
                 print(self.query_queue.popleft())
             else:
                 time.sleep(1)
