@@ -1,6 +1,7 @@
 import binascii
 import config
 import logging
+import msgpack
 
 logger = logging.getLogger("server")
 
@@ -37,7 +38,7 @@ def setup_logger(name, filename="lastrun.log"):
                         filemode='w+')
     # define a Handler which writes INFO messages or higher to the sys.stderr
     console = logging.StreamHandler()
-    console.setLevel(logging.INFO)
+    console.setLevel(config.LOGGER_LEVEL)
     # set a format which is simpler for console use
     formatter = logging.Formatter('%(name)-12s: %(levelname)-8s %(message)s')
     # tell the handler to use this format
@@ -60,7 +61,7 @@ def exchange(sock, msg):
     sock.sendall(bytes(msg, "utf-8"))
     # active_connections.remove(sock)
 
-def fetch(key):
+def fetch(key, selector):
     """Download packet from read-ready socket and save data in key.data"""
     sock = key.fileobj
     if key.data["data"]:
@@ -68,15 +69,15 @@ def fetch(key):
         return
     packet = sock.recv(config.RECV_SIZE)
     if not packet:
-        self.selector.unregister(sock)
+        selector.unregister(sock)
         sock.close()
         logger.info(f"Client closed connection")
-        return
+        return -1
     try:
         head = packet[:4]
     except IndexError:
         logger.warning(f"Invalid header in packet: {packet}")
-        return
+        return -1
     total_length, pack_id, status = parsehead(head)
     key.data["pack_id"] = pack_id
     key.data["status"] = status
@@ -84,10 +85,10 @@ def fetch(key):
     while len(key.data["data"]) < total_length:
         packet = sock.recv(config.RECV_SIZE)
         if not packet:
-            self.selector.unregister(sock)
+            selector.unregister(sock)
             sock.close()
             logger.info(f"Client suddenly closed connection")
-            return
+            return -1
         else:
             key.data["data"] += packet
             logger.debug(f"Additional packet received: {packet}")
@@ -98,9 +99,11 @@ def lastpack(key):
     """Return fetched data (pack_id, status, data) from key.data and clear it then."""
     if not key.data["data"]:
         raise ValueError("Key data is not available. You may want to fetch() first")
+        return -1
     pack_id = key.data.get("pack_id")
     status = key.data.get("status")
-    data = key.data.get("data")
+    # TODO: handle invalid data passed to unpackb
+    data = msgpack.unpackb(key.data.get("data"))
     key.data["pack_id"] = None
     key.data["status"] = None
     key.data["data"] = b""
@@ -125,3 +128,9 @@ def parsehead(header):
         req_id = header[2]
         status = header[3]
         return length, req_id, status
+
+def print_handles(selector):
+        handles = dict(selector.get_map())
+        print("HANDLES LIST:")
+        for key, h in handles.items():
+            print(f"[{key}: data={h.data} events={h.events}]")

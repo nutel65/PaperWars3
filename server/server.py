@@ -60,6 +60,7 @@ def main():
     
     services["cli"] = threadwork.CLIService()
     servercli.set_services(services)
+    servercli.set_selector(selector)
     services["cli"].start()
 
     # wait for each service termination

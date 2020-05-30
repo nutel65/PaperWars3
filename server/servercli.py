@@ -1,20 +1,27 @@
 import logging
 import os
+import utility
 
 logger = logging.getLogger("server")
 
 services = None
+selector = None
 COMMANDS = {
     "exit": "stops and safely terminates all server services",
     "exitf": "force stops program execution, exits immediately",
     "help": "list available commands",
     "dbmanager": "database manager",
-    "packrec": "packet receiver"
+    "packrec": "packet receiver",
+    "handles": "lists all handles/connections"
 }
 
 def set_services(services_dict):
     global services
     services = services_dict
+
+def set_selector(selector_obj):
+    global selector
+    selector = selector
 
 def undefined_command(command=""):
     print("UNDEFINED COMMAND", command)
@@ -24,6 +31,9 @@ def exe(command):
     """executes server CLI command"""
     # if command not in COMMANDS:
     #     logger.warning("Unsupported command. Type 'help' to list commands.")
+    if not(selector and command):
+        raise Exception("selector or command not set")
+        return
     cmd = command.split()
     if not cmd or not services:
         return
@@ -49,13 +59,13 @@ def exe(command):
             undefined_command()
     elif cmd[0] == "packrec":
         if len(cmd) == 1:
-            print("packrec arguments: status, handles")
+            print("packrec arguments: status")
         elif cmd[1] == "status":
             services["packrec"].status()
-        elif cmd[1] == "handles":
-            services["packrec"].get_handles()
         else:
             undefined_command()
+    elif cmd[0] == "handles":
+        utility.print_handles(selector)
     else:
         undefined_command()
     

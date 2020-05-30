@@ -54,7 +54,7 @@ class PacketReceiver(ThreadWorker):
             # select sockets with incoming data
             events = self.selector.select(timeout=config.SELECTOR_TIMEOUT)
             for key, mask in events:
-                print("events:", events)
+                logger.debug(f"selected {key.data}")
                 if key.data["type"] == "listener":
                     self.accept_client(key)
                 elif key.data["type"] == "no_handshake":
@@ -98,35 +98,33 @@ class PacketReceiver(ThreadWorker):
     def handle_unlogged(self, key):
         """Handle unlogged client which should
         try to log in or register at this point"""
-        utility.fetch(key)
-        pack_id = status = data = None
-        test1 = None
-        # try:
-        pack_id, status, data = utility.lastpack(key)
-        print("1", pack_id, status, data)
-        # except ValueError:
-        #     pass
-        print("2", pack_id, status, data)
-        api.handle(pack_id, status, data)
-        print("unpacked data:", msgpack.unpackb(data))
+        code = utility.fetch(key, self.selector)
+        if code == -1:
+            return
+        try:
+            pack_id, status, data = utility.lastpack(key)
+        except ValueError as e:
+            # BUG: valueerror from unpack(b) get caught unncessary%
+            logger.warning(e)
+        logger.debug(f"received: \npack_id: {pack_id}\nstatus: {status}\ndata: {data}")
+        # TODO: add api for logging in and register
+        # api.log_in()
         
 
     def handle_logged(self, key, mask):
         """Handled client is logged at this point,
         and can send any valid api request."""
-        utility.fetch(key)
-        pack_id = status = data = None
+        code = utility.fetch(key, self.selector)
+        if code == -1:
+            return
         try:
             pack_id, status, data = utility.lastpack(key)
+        except ValueError as e:
+            logger.warning(e)
+        else:
+            logger.debug(f"received: \npack_id: {pack_id}\nstatus: {status}\ndata: {data}")
+            # TODO: add api for logged user
             api.handle(key, pack_id, status)
-        except ValueError:
-            pass
-
-    def get_handles(self):
-        handles = dict(self.selector.get_map())
-        print("HANDLES LIST:")
-        for key, h in handles.items():
-            print(f"[{key}: data={h.data} events={h.events}]")
 
 
 class CLIService(ThreadWorker):
