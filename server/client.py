@@ -1,10 +1,11 @@
 #!/usr/bin/env python3
 
-import socket
-import time
 import binascii
-import utility
+import msgpack
+import socket
 import statuscode
+import time
+import utility
 
 logger = utility.setup_logger("client", filename="clientrun.log")
 
@@ -53,6 +54,12 @@ if __name__ == "__main__":
     PORT = 23232
     sock = connect_to_server(HOST, PORT)
     if sock:
-        sock.close()
+        while True:
+            inp = input("> ")
+            if not inp:
+                break
+            data = msgpack.packb(inp)
+            sock.sendall(utility.add_header(0, 0, data))
         logger.info("closing connection")
+        sock.close()
         time.sleep(1)

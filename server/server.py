@@ -46,16 +46,11 @@ def main():
     listening_sock.listen()
     logger.info(f"Server running at: {config.SERVER_IP}:{config.SERVER_PORT}")
 
-    services = {}
     selector = selectors.DefaultSelector()
     selector.register(listening_sock, selectors.EVENT_READ, data={"type": "listener"})
     
-    # INIT THREADS
-    # services["doorman"] = threading.Thread(
-    #     target=threadwork.accept_clients, 
-    #     args=(listening_sock, selector),
-    #     daemon=True)
-    # services["doorman"].start()
+    # INIT THREADS / SERVICES
+    services = {}
 
     services["packrec"] = threadwork.PacketReceiver(selector)
     services["packrec"].start()
@@ -67,6 +62,7 @@ def main():
     servercli.set_services(services)
     services["cli"].start()
 
+    # wait for each service termination
     while True:
         keys = list(services.keys())
         try:
