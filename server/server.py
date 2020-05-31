@@ -1,14 +1,17 @@
 #!/usr/bin/env python3
 
+import config
+import random
+import selectors
+import servercli
 import socket
 import threading
+import threadwork
 import time
 import utility
-import threadwork
-import config
 from collections import deque
 
-logger = utility.setup_logger()
+logger = utility.setup_logger("server")
 
 class GameRoom():
     game_id_gen = utility.id_gen("G_")
@@ -32,55 +35,48 @@ class Client():
         self.ip_addr = ip_addr
         self.gameroom_id = None
         self.context = None
-
-    def save_to_database(database):
-        ...
     
 def main():
-    # clients_db = {
-    #     #client_id: client_object,
-    # }
-    
     print(socket.gethostname())
     listening_sock = socket.socket(
         family=socket.AF_INET, 
-        type=socket.SOCK_STREAM) # | socket.SOCK_NONBLOCK)
+        type=socket.SOCK_STREAM)
+    listening_sock.setblocking(False)
     listening_sock.bind((config.SERVER_IP, config.SERVER_PORT))
     listening_sock.listen()
     logger.info(f"Server running at: {config.SERVER_IP}:{config.SERVER_PORT}")
 
-    # INIT THREADS
-    unassigned_clients_list = []
-    active_clients = []
     services = {}
+    selector = selectors.DefaultSelector()
+    selector.register(listening_sock, selectors.EVENT_READ, data={"type": "listener"})
     
-    services["doorman"] = threading.Thread(
-        target=threadwork.accept_clients, 
-        args=(listening_sock, unassigned_clients_list),
-        daemon=True)
-    services["doorman"].start()
+    # INIT THREADS
+    # services["doorman"] = threading.Thread(
+    #     target=threadwork.accept_clients, 
+    #     args=(listening_sock, selector),
+    #     daemon=True)
+    # services["doorman"].start()
 
-    services["data_receiver"] = threading.Thread(
-        target=threadwork.message_reveiver, 
-        args=(active_clients,),
-        daemon=True)
-    services["data_receiver"].start()
+    services["packrec"] = threadwork.PacketReceiver(selector)
+    services["packrec"].start()
 
-
-    services["dbmanager"] = threadwork.DBManager()
+    services["dbmanager"] = threadwork.DBManager("db_here")
     services["dbmanager"].start()
     
-    services["input_handler"] = threading.Thread(
-        target=threadwork.cli_input_handler,
-        args=(services, active_clients),
-        daemon=True)
-    services["input_handler"].start()
+    services["cli"] = threadwork.CLIService()
+    servercli.set_services(services)
+    services["cli"].start()
 
     while True:
-        if not unassigned_clients_list:
-            time.sleep(1)
-        else:
-            active_clients.append(unassigned_clients_list.pop())
+        keys = list(services.keys())
+        try:
+            k = random.choice(keys)
+        except:
+            break
+        services[k].join()
+        services.pop(k)
+
+    print("all services stopped")
     listening_sock.close()
 
 if __name__ == "__main__":
