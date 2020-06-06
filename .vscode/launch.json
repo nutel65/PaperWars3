@@ -5,10 +5,35 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "Flask Production",
+            "type": "python",
+            "request": "launch",
+            "program": "server/server.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "Flask Debug",
+            "type": "python",
+            "request": "launch",
+            "module": "flask",
+            "env": {
+                "FLASK_APP": "server/server.py",
+                "FLASK_ENV": "development",
+                "FLASK_DEBUG": "1"
+            },
+            "args": [
+                "run",
+                "--no-debugger",
+                "--no-reload"
+            ],
+            "jinja": true,
+            // "console": "externalTerminal"
+        },
+        {
             "name": "MAIN",
             "type": "python",
             "request": "launch",
-            "program": "main.py",
+            "program": "winclient/main.py",
             "console": "integratedTerminal"
         },
         {
@@ -19,17 +44,10 @@
             "console": "integratedTerminal"
         },
         {
-            "name": "SERVER",
-            "type": "python",
-            "request": "launch",
-            "program": "server/server.py",
-            "console": "externalTerminal"
-        },
-        {
             "name": "CLIENT",
             "type": "python",
             "request": "launch",
-            "program": "experimental/client.py",
+            "program": "winclient/client.py",
             "console": "integratedTerminal"
         }
     ]

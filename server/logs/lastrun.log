@@ -1,11 +1,2 @@
-05-30 22:17 server       INFO     Server running at: 127.0.0.1:23232
-05-30 22:17 server       INFO     PacketReceiver service started.
-05-30 22:17 server       INFO     DBManager service started.
-05-30 22:17 server       INFO     CLI service started.
-05-30 22:17 server       DEBUG    selected {'type': 'listener'}
-05-30 22:17 server       INFO     Client connected (127.0.0.1:52829)
-05-30 22:17 server       DEBUG    selected {'type': 'no_handshake', 'ip': '127.0.0.1', 'port': 52829, 'data': b''}
-05-30 22:17 server       INFO     128
-05-30 22:17 server       DEBUG    selected {'type': 'unlogged', 'ip': '127.0.0.1', 'port': 52829, 'data': b''}
-05-30 22:18 server       WARNING  PACKET LENGHT DO NOT MATCH (8/2)
-05-30 22:18 server       WARNING  unpack(b) received extra data.
+06-06 21:16 engineio.server  INFO     Server initialized for eventlet.
+06-06 21:16 werkzeug         INFO      * Restarting with stat

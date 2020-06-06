@@ -29,14 +29,15 @@ def load_all():
 
 def load_textures():
     global TILEMAP_TEXTURES 
+    textures = "winclient/assets/images/textures"
     TILEMAP_TEXTURES = {
-        0: pygame.image.load("assets/images/textures/default.png").convert(),
-        1: pygame.image.load("assets/images/textures/dirt.png").convert(),
-        2: pygame.image.load("assets/images/textures/forest32.png").convert(),
-        3: pygame.image.load("assets/images/textures/grass32.png").convert(),
-        4: pygame.image.load("assets/images/textures/sand.png").convert(),
-        5: pygame.image.load("assets/images/textures/snow.png").convert(),
-        6: pygame.image.load("assets/images/textures/water.png").convert(),
+        0: pygame.image.load(f"{textures}/default.png").convert(),
+        1: pygame.image.load(f"{textures}/dirt.png").convert(),
+        2: pygame.image.load(f"{textures}/forest32.png").convert(),
+        3: pygame.image.load(f"{textures}/grass32.png").convert(),
+        4: pygame.image.load(f"{textures}/sand.png").convert(),
+        5: pygame.image.load(f"{textures}/snow.png").convert(),
+        6: pygame.image.load(f"{textures}/water.png").convert(),
     }
     utils.log("assets.TILEMAP_TEXTURES initialized")
 
@@ -53,22 +54,24 @@ def load_sprites():
     blue_square = pygame.Surface((32, 32))
     blue_square.fill((0, 0, 255))
     
+    sprites = "winclient/assets/images/sprites"
     SPRITES = {
         "red_square": red_square,
         "green_square": green_square,
         "blue_square": blue_square,
-        "red_soldier": pygame.image.load("assets/images/sprites/red_soldier32.png").convert_alpha(),
-        "purple_soldier": pygame.image.load("assets/images/sprites/purple_soldier32.png").convert_alpha(),
+        "red_soldier": pygame.image.load(f"{sprites}/red_soldier32.png").convert_alpha(),
+        "purple_soldier": pygame.image.load(f"{sprites}/purple_soldier32.png").convert_alpha(),
     }
     utils.log("assets.SPRITES initialized")
 
 
 def load_icons():
     global ICONS
+    icons = "winclient/assets/images/icons"
     ICONS = {
-        "crossed_circle": pygame.image.load("assets/images/icons/cancel.png").convert_alpha(),
-        "crossed_arrows": pygame.image.load("assets/images/icons/move.png").convert_alpha(),
-        "red_sword": pygame.image.load("assets/images/icons/sword2.png").convert_alpha(),
+        "crossed_circle": pygame.image.load(f"{icons}/cancel.png").convert_alpha(),
+        "crossed_arrows": pygame.image.load(f"{icons}/move.png").convert_alpha(),
+        "red_sword": pygame.image.load(f"{icons}/sword2.png").convert_alpha(),
     }
     utils.log("assets.ICONS initialized")
 
@@ -76,7 +79,7 @@ def load_icons():
 def load_ui_elements():
     global UI_ELEMENTS
     UI_ELEMENTS = {
-        "hl_tile": pygame.image.load("assets/images/ui_elements/htwhite32.png").convert_alpha(),
+        "hl_tile": pygame.image.load("winclient/assets/images/ui_elements/htwhite32.png").convert_alpha(),
     }
     utils.log("assets.UI_ELEMENTS initialized")
 
