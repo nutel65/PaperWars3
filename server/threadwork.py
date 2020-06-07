@@ -84,7 +84,7 @@ class DBManager(ThreadWorker):
                 logger.info(f"{self.name} connected - {record}\n")
                 sleeptime = 3
                 self.wrap_run()
-            except (psycopg2.Error) as error :
+            except (psycopg2.Error):
                 logger.error(f"{self.name} Error: \n{traceback.format_exc()}")
                 logger.info(f"Attempting database reconnect in {sleeptime} seconds")
                 time.sleep(sleeptime)
@@ -132,7 +132,7 @@ class DBManager(ThreadWorker):
     def insert_user(self, username, password, privilege):
         # TODO: check if username is already taken
         entry = {
-            "query": "INSERT INTO users (username, password, privilege) VALUES (%s, %s, %s)",
+            "query": "INSERT INTO public.users (username, password, privilege) VALUES (%s, %s, %s)",
             "query_args": [username, password, privilege],
             "returns": False,
             "callback_event": None,
@@ -142,7 +142,7 @@ class DBManager(ThreadWorker):
     def get_user_by_username(self, username):
         event = threading.Event()
         entry = {
-            "query": "SELECT username, password, privilege FROM users WHERE username = %s",
+            "query": "SELECT username, password, privilege FROM public.users WHERE username = %s",
             "query_args": [username,],
             "returns": True,
             "callback_event": event,
