@@ -29,3 +29,4 @@ pygame == 1.9.6
 
 # C:\Users\User\Documents\PYTHON\PaperWars3\winclient\client.py: 3
 python_socketio == 4.6.0
+waitress == 1.4.4

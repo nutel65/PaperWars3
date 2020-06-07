@@ -10,6 +10,8 @@ import time
 import traceback
 from server import utility
 import psycopg2
+import os
+from urllib.parse import urlparse
 
 from collections import deque
 
@@ -59,61 +61,110 @@ class CLIService(ThreadWorker):
 
 
 class DBManager(ThreadWorker):
-    def __init__(self, user, password, database, host="127.0.0.1", port="5432"):
+    def __init__(self, database_url="postgres://postgres:rafix@localhost:5432/postgres"):
         ThreadWorker.__init__(self)
-        self.user = user
-        self.password = password
-        self.database = database
-        self.host = host
-        self.port = port
+        self.database_url = os.getenv('DATABASE_URL', database_url)
         self.query_queue = deque()
+        self.results = {}
         self.name = "DBManager"
 
     def run(self):
         logger.info(f"{self.name} service started.")
+        sleeptime = 3
         while not self.exitflag:
+            self.connection = None
             try:
-                self.connection = psycopg2.connect(user=self.user,
-                                            password=self.password,
-                                            host=self.host,
-                                            port=self.port,
-                                            database=self.database)
-
+                self.connection = psycopg2.connect(self.database_url)
                 self.cursor = self.connection.cursor()
                 # Print PostgreSQL Connection properties
                 # logger.info(self.connection.get_dsn_parameters())
-
                 # Print PostgreSQL version
                 self.cursor.execute("SELECT version();")
                 record = self.cursor.fetchone()
                 logger.info(f"{self.name} connected - {record}\n")
+                sleeptime = 3
                 self.wrap_run()
-            except (Exception, psycopg2.Error) as error :
-                logger.error(f"PostgreSQL: {error}")
+            except (psycopg2.Error) as error :
+                logger.error(f"{self.name} Error: \n{traceback.format_exc()}")
+                logger.info(f"Attempting database reconnect in {sleeptime} seconds")
+                time.sleep(sleeptime)
+                sleeptime *= 1.05
             finally:
-                logger.info(f"{self.name} service stopped.")
                 if(self.connection):
                     self.cursor.close()
                     self.connection.close()
                     logger.info("PostgreSQL connection is closed")
+            logger.info(f"{self.name} service stopped.")
             
     def wrap_run(self):
+        # TODO: non blocking queries
         while not self.exitflag or self.query_queue:
-            if self.query_queue:
-                query = query_queue.popleft()
-                logger.debug(f"{self.name} executing query: {query}")
-                cursor.execute(query)
-            else:
-                time.sleep(1)
+            try:
+                if self.query_queue:
+                    entry = self.query_queue.popleft()
+                    query = entry.get("query")
+                    args = entry.get("query_args")
+                    returns = entry.get("returns")
+                    callback_event = entry.get("callback_event")
+                    if returns and not callback_event:
+                        logger.error("should supply callback event when awaiting result")
+                        return
+                    logger.debug(f"{self.name} executing query: {query} with args: {args}")
+                    self.cursor.execute(query, args)
+                    if returns:
+                        returned = self.cursor.fetchall()
+                        self.results[callback_event] = returned
+                        logger.debug(f"query returned: {returned}")
+                    if callback_event:
+                        callback_event.set()
+                    logger.debug(self.cursor.statusmessage)
+                else:
+                    # TODO: REPLACE THAT UGLY THING BELOW
+                    time.sleep(1)
+            except psycopg2.errors.UniqueViolation as e:
+                logger.debug(f"Tried inserting username that already exists")
 
     def stop(self):
         self.exitflag = 1
         if self.query_queue:
             logger.info(f"{self.name}: waiting for finishing pending queries...")
 
-    def query(self, query_string):
-        if self.exitflag:
-            logger.warning(f"{self.name} stopped; Adding new query anyway...")
-        if not query_string:
-            logger.warning("Query string cannot be empty")
-        self.query_queue.append(query_string)
+    def insert_user(self, username, password, privilege):
+        # TODO: check if username is already taken
+        entry = {
+            "query": "INSERT INTO users (username, password, privilege) VALUES (%s, %s, %s)",
+            "query_args": [username, password, privilege],
+            "returns": False,
+            "callback_event": None,
+        }
+        self.query_queue.append(entry)
+
+    def get_user_by_username(self, username):
+        event = threading.Event()
+        entry = {
+            "query": "SELECT username, password, privilege FROM users WHERE username = %s",
+            "query_args": [username,],
+            "returns": True,
+            "callback_event": event,
+        }
+        logger.debug(f"get_user_by_username query (username: {username}")
+        self.query_queue.append(entry)
+        event.wait()
+        query_result = self.results.pop(event)[0]
+        logger.debug(f"get_user_by_username query returned with result: {query_result}")
+        return query_result
+
+    def select(self, query):
+        event = threading.Event()
+        entry = {
+            "query": query,
+            "query_args": [],
+            "returns": True,
+            "callback_event": event,
+        }
+        self.query_queue.append(entry)
+        event.wait()
+        query_result = self.results.pop(event)
+        return query_result
+
+

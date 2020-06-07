@@ -26,15 +26,17 @@ redirect = None
 logger = utility.setup_logger(__name__, redirect=redirect)
 socketio = SocketIO(app, logger=True)
 services = {}
-# # services["packrec"] = threadwork.PacketReceiver(selector)
-# # services["packrec"].start()
+services["cli"] = threadwork.CLIService()
+servercli.set_services(services)
+services["cli"].start()
 # services["dbmanager"] = threadwork.DBManager(
 #     user="kndylszorbdwcq",
 #     password="f4771035032107cf4be02f33f89db831876600a91b9f297e9610d348ad750854",
 #     database="ddhdsngovg5a6n",
 #     host="ec2-54-247-79-178.eu-west-1.compute.amazonaws.com"
 # )
-# services["dbmanager"].start()
+services["dbmanager"] = threadwork.DBManager()
+services["dbmanager"].start()
 # socketio.run(app, host='localhost', port=80, debug=True)
 
 @app.route('/home')
@@ -61,6 +63,14 @@ def index():
 @app.route("/debug")
 def debug_page():
     raise
+
+@app.route("/insert_test/<a>/<b>/<c>")
+def test_insert_user(a, b, c):
+    return str(services["dbmanager"].insert_user(a, b, c))
+
+@app.route("/select/<username>")
+def test_select_user_by_username(username):
+    return str(services["dbmanager"].get_user_by_username(username))
 
 # @app.route("/getPlotCSV")
 # def getPlotCSV():

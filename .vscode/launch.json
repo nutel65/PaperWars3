@@ -8,11 +8,20 @@
             "name": "Flask Production",
             "type": "python",
             "request": "launch",
-            "program": "server/server.py",
-            "console": "integratedTerminal"
+            "module": "waitress-serve",
+            "env": {
+                "FLASK_ENV": "production",
+                "FLASK_DEBUG": "0"
+            },
+            "args": [
+                "--call",
+                "server:server",
+            ],
+            "jinja": true,
+            // "console": "externalTerminal"
         },
         {
-            "name": "Flask Debug",
+            "name": "Flask Development",
             "type": "python",
             "request": "launch",
             "module": "flask",
@@ -23,7 +32,7 @@
             },
             "args": [
                 "run",
-                "--no-debugger",
+                // "--no-debugger",
                 "--no-reload"
             ],
             "jinja": true,
