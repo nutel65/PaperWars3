@@ -24,7 +24,6 @@ redirect = None
 # if not app.debug:
     # redirect = "./server/logs/lastrun.log"
 logger = utility.setup_logger(__name__, redirect=redirect)
-app.config.from_pyfile('./server/flask.cfg')
 socketio = SocketIO(app, logger=True)
 services = {}
 # # services["packrec"] = threadwork.PacketReceiver(selector)
