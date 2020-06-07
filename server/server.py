@@ -27,10 +27,10 @@ redirect = None
 logger = utility.setup_logger(__name__, redirect=redirect)
 socketio = SocketIO(app, logger=True)
 services = {}
-if os.environ.get("FLASK_ENV") == "development":
-    services["cli"] = threadwork.CLIService()
-    servercli.set_services(services)
-    services["cli"].start()
+# if os.environ.get("FLASK_ENV") == "development":
+#     services["cli"] = threadwork.CLIService()
+#     servercli.set_services(services)
+#     services["cli"].start()
 services["dbmanager"] = threadwork.DBManager()
 services["dbmanager"].start()
 # socketio.run(app, host='localhost', port=80, debug=True)
