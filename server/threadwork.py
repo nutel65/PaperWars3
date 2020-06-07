@@ -75,6 +75,7 @@ class DBManager(ThreadWorker):
             self.connection = None
             try:
                 self.connection = psycopg2.connect(self.database_url)
+                self.connection.autocommit = True
                 self.cursor = self.connection.cursor()
                 # Print PostgreSQL Connection properties
                 # logger.info(self.connection.get_dsn_parameters())
