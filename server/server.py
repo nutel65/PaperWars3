@@ -12,6 +12,7 @@ from flask_socketio import SocketIO, emit
 from server import packetcode
 from server import statuscode
 import time
+import os
 
 # cd server
 # $env:FLASK_APP = "server.py" / set FLASK_APP=server.py
@@ -26,15 +27,10 @@ redirect = None
 logger = utility.setup_logger(__name__, redirect=redirect)
 socketio = SocketIO(app, logger=True)
 services = {}
-services["cli"] = threadwork.CLIService()
-servercli.set_services(services)
-services["cli"].start()
-# services["dbmanager"] = threadwork.DBManager(
-#     user="kndylszorbdwcq",
-#     password="f4771035032107cf4be02f33f89db831876600a91b9f297e9610d348ad750854",
-#     database="ddhdsngovg5a6n",
-#     host="ec2-54-247-79-178.eu-west-1.compute.amazonaws.com"
-# )
+if os.environ.get("FLASK_ENV") != "development":
+    services["cli"] = threadwork.CLIService()
+    servercli.set_services(services)
+    services["cli"].start()
 services["dbmanager"] = threadwork.DBManager()
 services["dbmanager"].start()
 # socketio.run(app, host='localhost', port=80, debug=True)
