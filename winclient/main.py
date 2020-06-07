@@ -1,8 +1,9 @@
-"""Run this file to start game. 
-All initial configuration happens here.
-"""
+"""PaperWars Windows client // entry point."""
+# import sys
+# sys.path.append("/winclient")
+import os
 import pygame
-import assets
+import common.assets
 from engine import GameInstance
 from engine.render import Renderer2D
 from src import controls

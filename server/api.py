@@ -1,6 +1,6 @@
 import logging
-import statuscode
-import utility
+from server import statuscode
+from server import utility
 
 logger = logging.getLogger("server")
 

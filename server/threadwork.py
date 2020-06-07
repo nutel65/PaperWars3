@@ -1,17 +1,19 @@
-import api
-import config
+from server import api
+from server import config
 import logging
 import msgpack
 import selectors
-import servercli
-import statuscode
+from server import servercli
+from server import statuscode
 import threading
 import time
 import traceback
-import utility
+from server import utility
+import psycopg2
+
 from collections import deque
 
-logger = logging.getLogger("server")
+logger = logging.getLogger(__name__)
 
 class ThreadWorker(threading.Thread):
     def __init__(self):
@@ -42,91 +44,6 @@ class ThreadWorker(threading.Thread):
         return self.is_alive()
 
 
-class PacketReceiver(ThreadWorker):
-    # TODO: extract logged and unlogged methods out of class
-    def __init__(self, selector):
-        ThreadWorker.__init__(self)
-        self.name = "PacketReceiver"
-        self.selector = selector
-        
-    def wrap_run(self):
-        while not self.exitflag:
-            # select sockets with incoming data
-            events = self.selector.select(timeout=config.SELECTOR_TIMEOUT)
-            for key, mask in events:
-                logger.debug(f"selected {key.data}")
-                if key.data["type"] == "listener":
-                    self.accept_client(key)
-                elif key.data["type"] == "no_handshake":
-                    self.handshake_client(key)
-                elif key.data["type"] == "unlogged":
-                    self.handle_unlogged(key)
-                elif key.data["type"] == "logged":
-                    self.handle_logged(key, mask)
-                else:
-                    raise ValueError(f"Invalid register type: {key.data['type']}")
-            
-    def accept_client(self, key):
-        """Accept incoming connection and and register him in selector."""
-        listening_sock = key.fileobj
-        client_sock, addr = listening_sock.accept()
-        client_sock.setblocking(False)
-        events = selectors.EVENT_READ #| selectors.EVENT_WRITE
-        self.selector.register(client_sock, events, 
-            data={
-                "type": "no_handshake",
-                "ip": addr[0],
-                "port": addr[1],
-                "data": b"",
-                })
-        logger.info(f"Client connected ({addr[0]}:{addr[1]})")
-
-
-    def handshake_client(self, key):
-        sock = key.fileobj
-        packet = sock.recv(config.RECV_SIZE)
-        print(packet)
-        status = api.handshake(packet, sock)
-        if status == statuscode.HANDSHAKE_OK:
-            key.data["type"] = "unlogged"
-        else:
-            self.selector.unregister(sock)
-            sock.close()
-        logger.info(f"{status}")
-    
-
-    def handle_unlogged(self, key):
-        """Handle unlogged client which should
-        try to log in or register at this point"""
-        code = utility.fetch(key, self.selector)
-        if code == -1:
-            return
-        try:
-            pack_id, status, data = utility.lastpack(key)
-        except ValueError as e:
-            # BUG: valueerror from unpack(b) get caught unncessary%
-            logger.warning(e)
-        logger.debug(f"received: \npack_id: {pack_id}\nstatus: {status}\ndata: {data}")
-        # TODO: add api for logging in and register
-        # api.log_in()
-        
-
-    def handle_logged(self, key, mask):
-        """Handled client is logged at this point,
-        and can send any valid api request."""
-        code = utility.fetch(key, self.selector)
-        if code == -1:
-            return
-        try:
-            pack_id, status, data = utility.lastpack(key)
-        except ValueError as e:
-            logger.warning(e)
-        else:
-            logger.debug(f"received: \npack_id: {pack_id}\nstatus: {status}\ndata: {data}")
-            # TODO: add api for logged user
-            api.handle(key, pack_id, status)
-
-
 class CLIService(ThreadWorker):
     def __init__(self):
         ThreadWorker.__init__(self)
@@ -142,19 +59,50 @@ class CLIService(ThreadWorker):
 
 
 class DBManager(ThreadWorker):
-    def __init__(self, database=None):
+    def __init__(self, user, password, database, host="127.0.0.1", port="5432"):
         ThreadWorker.__init__(self)
+        self.user = user
+        self.password = password
         self.database = database
+        self.host = host
+        self.port = port
         self.query_queue = deque()
         self.name = "DBManager"
 
+    def run(self):
+        logger.info(f"{self.name} service started.")
+        while not self.exitflag:
+            try:
+                self.connection = psycopg2.connect(user=self.user,
+                                            password=self.password,
+                                            host=self.host,
+                                            port=self.port,
+                                            database=self.database)
+
+                self.cursor = self.connection.cursor()
+                # Print PostgreSQL Connection properties
+                # logger.info(self.connection.get_dsn_parameters())
+
+                # Print PostgreSQL version
+                self.cursor.execute("SELECT version();")
+                record = self.cursor.fetchone()
+                logger.info(f"{self.name} connected - {record}\n")
+                self.wrap_run()
+            except (Exception, psycopg2.Error) as error :
+                logger.error(f"PostgreSQL: {error}")
+            finally:
+                logger.info(f"{self.name} service stopped.")
+                if(self.connection):
+                    self.cursor.close()
+                    self.connection.close()
+                    logger.info("PostgreSQL connection is closed")
+            
     def wrap_run(self):
         while not self.exitflag or self.query_queue:
             if self.query_queue:
-                ...
-                # TODO: Add real database.
-                # database.query(query_queue.popleft()) 
-                print(self.query_queue.popleft())
+                query = query_queue.popleft()
+                logger.debug(f"{self.name} executing query: {query}")
+                cursor.execute(query)
             else:
                 time.sleep(1)
 
@@ -165,8 +113,7 @@ class DBManager(ThreadWorker):
 
     def query(self, query_string):
         if self.exitflag:
-            logger.error(f"{self.name} stopped; Could not add new query")
-            return
+            logger.warning(f"{self.name} stopped; Adding new query anyway...")
         if not query_string:
-            print("query string cannot be empty")
+            logger.warning("Query string cannot be empty")
         self.query_queue.append(query_string)

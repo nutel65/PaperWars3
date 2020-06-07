@@ -1,6 +1,6 @@
 import logging
 import os
-import utility
+from server import utility
 
 logger = logging.getLogger("server")
 
@@ -65,7 +65,9 @@ def exe(command):
         else:
             undefined_command()
     elif cmd[0] == "handles":
-        utility.print_handles(selector)
+        # TODO: print list of connections / connected users
+        # utility.print_handles(selector)
+        ...
     else:
         undefined_command()
     

@@ -29,7 +29,7 @@ class Renderer2D:
         assets.load_textures()
         # array = utils.TilemapFileParser("assets/maps/test.tm").parse()
         # array = utils.TilemapFileParser("assets/maps/map1.tm").parse()
-        array = utils.TilemapFileParser("assets/maps/calib_map.tm").parse()
+        array = utils.TilemapFileParser("winclient/assets/maps/calib_map.tm").parse()
         self._tmr = TilemapRenderer(array)
         self.camera = Camera2D(self, *self._tmr.render_full().get_rect())
         self.enqueue_all()
