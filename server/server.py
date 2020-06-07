@@ -15,9 +15,9 @@ import time
 import os
 
 # cd server
-# $env:FLASK_APP = "server.py" / set FLASK_APP=server.py
-# $env:FLASK_ENV = "development" / set FLASK_ENV=development
-# $env:FLASK_SECRET_KEY = ""
+# $env:FLASK_APP = "server/server.py"
+# $env:FLASK_ENV = "development"
+# $env:FLASK_SECRET_KEY = "test_key"
 # flask run --host=0.0.0.0 --port=80
 
 app = Flask(__name__)
@@ -27,7 +27,7 @@ redirect = None
 logger = utility.setup_logger(__name__, redirect=redirect)
 socketio = SocketIO(app, logger=True)
 services = {}
-if os.environ.get("FLASK_ENV") != "development":
+if os.environ.get("FLASK_ENV") != "production":
     services["cli"] = threadwork.CLIService()
     servercli.set_services(services)
     services["cli"].start()
