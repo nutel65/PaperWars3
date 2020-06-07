@@ -27,7 +27,7 @@ redirect = None
 logger = utility.setup_logger(__name__, redirect=redirect)
 socketio = SocketIO(app, logger=True)
 services = {}
-if os.environ.get("FLASK_ENV") != "production":
+if os.environ.get("FLASK_ENV") == "development":
     services["cli"] = threadwork.CLIService()
     servercli.set_services(services)
     services["cli"].start()
