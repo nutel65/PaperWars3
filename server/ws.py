@@ -15,7 +15,8 @@ def on_connect():
     
 @socketio.on('disconnect')
 def on_disconnect():
-    logger.info('Client disconnected')
+    active_users.pop(request.sid)
+    logger.info(f'Client disconnected. Removed from active_users. Active users now: {len(active_users)}')
 
 @socketio.on(packetcode.LOGIN_REQUEST)
 def on_login(message):
