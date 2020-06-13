@@ -1,9 +1,15 @@
 #!/usr/bin/env python3
+import sys
+sys.path.append("..")
 
 import socketio
-import statuscode
-import packetcode
 import logging
+from server import statuscode
+from server import packetcode
+
+username = "rafix"
+password = "rafix"
+target = "http://localhost:5000"
 
 logging.basicConfig(level=logging.DEBUG,
                         format='%(asctime)s %(name)-16s %(levelname)-8s %(message)s',
@@ -11,24 +17,33 @@ logging.basicConfig(level=logging.DEBUG,
                         # filename=f'./server/logs/{filename}',
                         filemode='w+')
 logger = logging.getLogger(__name__)
+logging.getLogger("urllib3.connectionpool").setLevel(logging.INFO)
+
 sio = socketio.Client()
 
 @sio.event
 def connect():
-    print('connection established')
+    logger.info('connection established')
+    sio.emit(packetcode.LOGIN_REQUEST, {'username': username, 'password': password})
 
 @sio.event
 def disconnect():
-    print('disconnected from server')
+    logger.info('disconnected from server')
 
 @sio.on(packetcode.LOGIN_RESPONSE)
 def login_response(data):
-    print('login response received with ', data)
+    status = data["status"]
+    logger.info(f'login response received with {data}')
+    if status == statuscode.LOGIN_OK or status == statuscode.ADMIN_LOGIN_OK:
+        logger.info("Successfully logged in.")
+    elif status == statuscode.NO_SUCH_USER:
+        logger.info("No such user in database")
+    elif status == statuscode.INCORRECT_PASSWORD:
+        logger.info("Incorrect password")
+    else:
+        logger.info(f"Login error. Status code: {data[status]}")
 
 if __name__ == "__main__":
-    sio.connect('http://localhost:5000')
-    print("connected. sending login request")
-    sio.emit(packetcode.LOGIN_REQUEST, {'login': 'rafix', 'password': 'pwd'})
-    print("login request sent")
+    sio.connect(target)
     sio.wait()
 

@@ -1,21 +1,17 @@
-from server import api
-from server import config
 import logging
-import msgpack
 import selectors
 from server import servercli
-from server import statuscode
 import threading
 import time
 import traceback
-from server import utility
 import psycopg2
 import os
-from urllib.parse import urlparse
 
 from collections import deque
 
 logger = logging.getLogger(__name__)
+
+
 
 class ThreadWorker(threading.Thread):
     def __init__(self):
@@ -122,7 +118,7 @@ class DBManager(ThreadWorker):
                 else:
                     # TODO: REPLACE THAT UGLY THING BELOW
                     time.sleep(1)
-            except psycopg2.errors.UniqueViolation as e:
+            except psycopg2.errors.UniqueViolation:
                 logger.debug(f"Tried inserting username that already exists")
 
     def stop(self):
@@ -133,7 +129,7 @@ class DBManager(ThreadWorker):
     def insert_user(self, username, password, privilege):
         # TODO: check if username is already taken
         entry = {
-            "query": "INSERT INTO public.users (username, password, privilege) VALUES (%s, %s, %s)",
+            "query": "INSERT INTO users (username, password, privilege) VALUES (%s, %s, %s)",
             "query_args": [username, password, privilege],
             "returns": False,
             "callback_event": None,
@@ -143,7 +139,7 @@ class DBManager(ThreadWorker):
     def get_user_by_username(self, username):
         event = threading.Event()
         entry = {
-            "query": "SELECT username, password, privilege FROM public.users WHERE username = %s",
+            "query": "SELECT username, password, privilege FROM users WHERE username = %s",
             "query_args": [username,],
             "returns": True,
             "callback_event": event,

@@ -1,4 +1,0 @@
-# config.py
-MAX_ROOMS = 1
-MAX_CONNECTIONS = 5
-LOGGER_LEVEL = "DEBUG"

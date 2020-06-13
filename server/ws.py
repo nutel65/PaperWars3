@@ -1,33 +1,47 @@
 import logging
 from server import statuscode
 from server import utility
+from server import packetcode
+from server.app import socketio, app, dbmanager
+from flask import request
+from flask_socketio import emit #, join_room, leave_room
 
-logger = logging.getLogger("server")
+logger = logging.getLogger(__name__)
+active_users = {}
 
-def handle(pack_id, status, data):
-    """API for logged user."""
-    # TODO: handle api call
-    logger.debug(f"API call: {pack_id}, {status}, {data}")
-    print(data)
+@socketio.on('connect')
+def on_connect():
+    logger.info("Client connected")
+    
+@socketio.on('disconnect')
+def on_disconnect():
+    logger.info('Client disconnected')
 
-# First 2 bytes of each packed indicate packet length in bytes. Range (0 - 65535) bytes.
-# Next 1 byte is the request ID. (0-255)
-# Next 1 byte is the status code. (0-255)
+@socketio.on(packetcode.LOGIN_REQUEST)
+def on_login(message):
+    logger.debug(message)
+    username = message.get('username')
+    password = message.get('password')
+    sid = request.sid
+    
+    privilege = 'u'
+    status = utility.validate_credentials(dbmanager, username, password)
+    if status == statuscode.ADMIN_LOGIN_OK:
+        privilege = 'a'
+    if status == statuscode.LOGIN_OK:
+        active_users[sid] = {
+            "username": username,
+            "room": "lobby",
+            "privilege": privilege,
+        }
+    emit(packetcode.LOGIN_RESPONSE, {'status': status}, room=sid)
 
-
-def ws_handshake(packet, client_sock):
-    # First 3 bytes - protocol version - in format MAJOR.MINOR.PATCH
-    print("packet", packet)
-    print("packet len:", len(packet))
-    if len(packet) != 3:
-        print("handshake not passed")
-        status = statuscode.PROTOCOL_NOT_SUPPORTED
-    else:
-        major = packet[0]
-        minor = packet[1]
-        patch = packet[2]
-        print(f"Client version {major}.{minor}.{patch}")
-        status = statuscode.HANDSHAKE_OK
-        client_sock.sendall(utility.int_to_bhex(status))
-    return status
-
+# @socketio.on(packetcode.LOGIN_REQUEST)
+# def ws_handshake(packet, client_sock):
+#     print("packet", packet)
+#     major = packet[0]
+#     minor = packet[1]
+#     patch = packet[2]
+#     print(f"Client version {major}.{minor}.{patch}")
+#     status = statuscode.HANDSHAKE_OK
+#     return status
