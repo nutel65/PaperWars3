@@ -15,7 +15,7 @@ def handle(pack_id, status, data):
 # Next 1 byte is the status code. (0-255)
 
 
-def handshake(packet, client_sock):
+def ws_handshake(packet, client_sock):
     # First 3 bytes - protocol version - in format MAJOR.MINOR.PATCH
     print("packet", packet)
     print("packet len:", len(packet))
