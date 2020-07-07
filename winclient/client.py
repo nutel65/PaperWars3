@@ -1,11 +1,13 @@
 #!/usr/bin/env python3
-import sys
-sys.path.append("..")
 
-import socketio
-import logging
+import sys
+import os
+sys.path.insert(1, os.path.join(sys.path[0], '..'))
+
 from server import statuscode
 from server import packetcode
+import socketio
+import logging
 
 username = "rafix"
 password = "rafix"

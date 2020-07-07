@@ -26,7 +26,7 @@ class CustomCommand(Command):
 class EntityMoveCommand(Command):
     """Moves entity to destination px."""
     def execute(self, ent, dest_px):
-        ent.set_pos_px(dest_px)
+        ent.set_pos(dest_px[0], dest_px[1])
 
 
 class EntityAttackCommand(Command):

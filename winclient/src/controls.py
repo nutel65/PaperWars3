@@ -18,6 +18,7 @@ def exit_check(event):
 class EventHandler():
     def __init__(self, game, renderer):
         self.renderer = rdr = renderer
+        self.keyboard_controllers = []
         self.game = game
         self.exit_game = commands.ExitGameCommand(game, rdr)
         self.zoom_in = commands.CameraZoomCommand(game, rdr, '+')
@@ -28,6 +29,14 @@ class EventHandler():
 
     def handle(self, event):
         if event.type == pygame.KEYDOWN:
+            for controller in self.keyboard_controllers:
+                if event.key in controller.bindings:
+                    control = controller.bindings[event.key]
+                    args = control[1]
+                    kwargs = control[2]
+                    control[0].execute(*args, **kwargs)
+                    utils.log("Capturing external controller keybind", type="DEBUG")
+                    break
             self._handle_keydown(event)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             self._handle_mouse_click(event)
@@ -75,8 +84,19 @@ class EventHandler():
         # scroll down
         if event.button == 5:
             self.zoom_out.execute()
-            
-
 
     def _handle_mouse_motion(self, event):
         ...
+
+    def attach_controller(self, controller):
+        if isinstance(controller, KeyboardController):
+            self.keyboard_controllers.append(controller)
+        else:
+            raise TyperError(f"Such controller instance not supported ({controller})")
+
+class KeyboardController:
+    def __init__(self):
+        self.bindings = {}
+
+    def bind_key(self, pygame_key, command, *command_args, **command_kwargs):
+        self.bindings[pygame_key] = [command, command_args, command_kwargs]

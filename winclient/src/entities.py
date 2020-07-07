@@ -18,13 +18,13 @@ class Entity2D():
 class Drawable(Entity2D):
     """Represents object that can be drawn"""
     def __init__(self, *args, **kwargs):
-        self.image = None # pygame.Surface
-        self.rect = None # pygame.Rect
+        # NOTE: SCREEN_STATIC has precedence over MAP_STATIC
         self.RENDER_PRIORITY = 1 # int
-        # SCREEN_STATIC has precedence over MAP_STATIC
         self.MAP_STATIC = False # if true object behaves like part of map while rendering
         self.SCREEN_STATIC = False # determines whether object moves / zooms along with camera
-        raise NotImplementedError
+        self.image = None # pygame.Surface
+        self.rect = None # pygame.Rect
+        raise NotImplementedError("Override this method")
 
     def draw(self, dest_surf, pos_px, area=None, scale=1.0):
         """Intended to be called from renderer.
@@ -37,21 +37,32 @@ class Drawable(Entity2D):
 class Sprite(Drawable):
     """Entity representable with single image."""
     def __init__(self, pos_px, image, renderer):
+        self.RENDER_PRIORITY = 2
+        self.MAP_STATIC = True
+        self.SCREEN_STATIC = False
         self.image = assets.SPRITES[image]
         self.rect = self.image.get_rect()
         self.rect.topleft = pos_px
         self._renderer = renderer
-        self.RENDER_PRIORITY = 2
-        self.MAP_STATIC = True
-        self.SCREEN_STATIC = False
+        self.previous_rect = None # set after changinging object's position
 
-    def get_pos_px(self):
+    def get_pos(self):
+        """Return global top left position of entity (in pixels)."""
         return self.rect.topleft
 
-    def set_pos_px(self, x, y):
+    def set_pos(self, x, y):
+        """Set / change object position (top left corner) to given position (in pixels)."""
+        self.previous_rect = self.rect.copy()
         self.rect.topleft = (x, y)
+        # print("prev rect", self.previous_rect)
+        # print("current rect", self.rect)
         self._renderer.render_request_list.append(self)
 
+class Soldier(Sprite):
+    def __init__(self, pos_px, image, renderer):
+        super().__init__(pos_px, image, renderer)
+
+    
 
 # class Tile(Drawable):
 #     """Represents single tile in tilemap."""

@@ -79,9 +79,9 @@ def scale_rect(rect, scale=1.0):
     """Scales RECT (pygame.Rect) to given SCALE."""
     w = int(rect.w * scale)
     h = int(rect.h * scale)
-    # w = rect.w * scale
-    # h = rect.h * scale
-    return pygame.Rect(rect.left, rect.top, w, h)
+    x = rect.x
+    y = rect.y
+    return pygame.Rect(x, y, w, h)
 
 
 def local_to_global(renderer, local_pos):
@@ -114,3 +114,22 @@ def log(msg="", type="Info", time=True, output=print):
     if time:
         t = datetime.now().strftime("%H:%M:%S:%f")[:-3]
     output(f"[{type}]:({t}): {msg}")
+
+
+def tile(tile_x, tile_y):
+    """Returns global position of from tile array indices.
+    e.g tile(2, 1) -> (64, 32)
+    """
+    tile_size = 32
+    return (tile_x * tile_size, tile_y * tile_size)
+
+def translate_to_screen_rect(rect, camera, display_rect=None):
+        """Returns screen position (in form of pygame.Rect) for entity to be rendered to."""
+        if not display_rect:
+            display_rect = pygame.Rect(0, 0, 0, 0)
+        zoom = camera.get_zoom()
+        screen_x = (rect.topleft[0] * zoom) - camera.rect.topleft[0] + display_rect.x
+        screen_y = (rect.topleft[1] * zoom) - camera.rect.topleft[1] + display_rect.y
+        
+        width, height = rect.size
+        return scale_rect(pygame.Rect(screen_x, screen_y, width, height), zoom)

@@ -12,17 +12,17 @@ class GameInstance:
         self.client_state = state.ClientState()
         self.game_state = state.GameState()
         # self.connection_state = state.ConnectionState()
-        self.entities = set()
+        self.entities = []
 
     def add_ent(self, entity_type, *args, **kwargs):
         """Easy and convenient way to add new entities."""
         if entity_type == "soldier":
-            ent = entities.Sprite(*args, **kwargs)
+            ent = entities.Soldier(*args, **kwargs)
         elif entity_type == "button":
             raise NotImplementedError
         else:
             raise ValueError(f"Entity type {entity_type} does not exist.")
-        self.entities.add(ent)
+        self.entities.append(ent)
         # self.renderer.render_request_list.append(ent)
         # TODO: above line not working
 

@@ -15,8 +15,11 @@ def on_connect():
     
 @socketio.on('disconnect')
 def on_disconnect():
-    active_users.pop(request.sid)
-    logger.info(f'Client disconnected. Removed from active_users. Active users now: {len(active_users)}')
+    popped = active_users.pop(request.sid, default=None)
+    if popped:
+        logger.info(f'Logged client disconnected. Removed from active_users. Active users now: {len(active_users)}')
+    else:
+        logger.info("Guest client just disconnected.")
 
 @socketio.on(packetcode.LOGIN_REQUEST)
 def on_login(message):
@@ -25,11 +28,14 @@ def on_login(message):
     password = message.get('password')
     sid = request.sid
     
-    privilege = 'u'
     status = utility.validate_credentials(dbmanager, username, password)
-    if status == statuscode.ADMIN_LOGIN_OK:
-        privilege = 'a'
-    if status == statuscode.LOGIN_OK:
+    
+    if status == statuscode.LOGIN_OK or statuscode.ADMIN_LOGIN_OK:
+        privilege = None
+        if status == statuscode.ADMIN_LOGIN_OK:
+            privilege = 'a'
+        else:
+            privilege = 'u'
         active_users[sid] = {
             "username": username,
             "room": "lobby",

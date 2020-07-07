@@ -58,3 +58,6 @@ class Camera2D():
     def normalize_position(self, bound_rect):
         """Shift camera position to fit camera.rect in renderer.DISPLAY_RECT."""
         ...
+
+    def __str__(self):
+        return f"{type(self).__name__}({self.rect}, ({self.get_zoom()}x))"
