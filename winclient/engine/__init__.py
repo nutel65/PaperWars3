@@ -23,8 +23,11 @@ class GameInstance:
         else:
             raise ValueError(f"Entity type {entity_type} does not exist.")
         self.entities.append(ent)
-        # self.renderer.render_request_list.append(ent)
-        # TODO: above line not working
+
+    def entity_at_pos(pos):
+        for ent in entities:
+            if ent.get_pos() == pos:
+                return ent
 
     def update_client_state(self, renderer):
         cs = self.client_state

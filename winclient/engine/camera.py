@@ -45,7 +45,6 @@ class Camera2D():
         w, h = self._default_rect.size
         self.rect.size = (w // zoom_value, h // zoom_value)
         self.tilemap_rect.size = (w * zoom_value, h * zoom_value)
-        self.renderer.update_all()
 
     def get_zoom(self):
         """Returns true zoom value."""

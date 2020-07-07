@@ -129,6 +129,9 @@ class Renderer2D:
         # redraw each element in render list and then remove them from that list
         while self.render_request_list:
             ent = self.render_request_list.pop()
+            if ent._hp <= 0:
+                utils.log("skipped rendering dead entity")
+                continue
             count2 = self._draw(ent)
             counter += count2
 

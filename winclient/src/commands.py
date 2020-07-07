@@ -26,13 +26,14 @@ class CustomCommand(Command):
 class EntityMoveCommand(Command):
     """Moves entity to destination px."""
     def execute(self, ent, dest_px):
+        # TODO: prevent moving outside the map
         ent.set_pos(dest_px[0], dest_px[1])
 
 
 class EntityAttackCommand(Command):
     """Causes entity to attack other entity."""
     def execute(self, ent, dest_ent):
-        raise NotImplementedError
+        ent.attack(dest_ent)
 
 
 class ExitGameCommand(Command):
@@ -70,6 +71,7 @@ class CameraZoomCommand(Command):
 
         x2, y2 = p2 = self.game.client_state.mouse_pos_global
         diff = (x1 - x2, y1 - y2)
+        print("***********8")
         self.cam_move_by.execute(*diff)
         utils.log(f"Camera ZOOM on: GLOBAL:{p2}; {cam}")
 

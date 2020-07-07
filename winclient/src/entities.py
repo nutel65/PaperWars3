@@ -50,9 +50,12 @@ class Sprite(Drawable):
         """Return global top left position of entity (in pixels)."""
         return self.rect.topleft
 
+    def _set_previous_rect(self):
+        self.previous_rect = self.rect.copy()
+
     def set_pos(self, x, y):
         """Set / change object position (top left corner) to given position (in pixels)."""
-        self.previous_rect = self.rect.copy()
+        self._set_previous_rect()
         self.rect.topleft = (x, y)
         # print("prev rect", self.previous_rect)
         # print("current rect", self.rect)
@@ -61,8 +64,20 @@ class Sprite(Drawable):
 class Soldier(Sprite):
     def __init__(self, pos_px, image, renderer):
         super().__init__(pos_px, image, renderer)
+        self._hp = 5
+        self._ad = 2
 
-    
+    def attack(self, entity):
+        entity.minus_hp(self._ad)
+
+    def minus_hp(self, amount):
+        utils.log("Entity is attacked")
+        self._hp -= amount
+        if self._hp <= 0:
+            utils.log("Entity killed")
+            self._renderer.render_request_list.append(self)
+            self._set_previous_rect()
+
 
 # class Tile(Drawable):
 #     """Represents single tile in tilemap."""
