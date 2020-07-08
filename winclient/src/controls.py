@@ -10,19 +10,11 @@ from src import constants
 
 logger = logging.getLogger(__name__)
 
-def pump_events(self):
-    pygame.event.pump()
+# def pump_events(self):
+#     pygame.event.pump()
 
 
-def exit_check(event):
-        if event.type == pygame.QUIT:
-            return True
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_ESCAPE:
-                return True
-
-
-class EventHandler():
+class InputHandler():
     def __init__(self, renderer):
         self.renderer = rdr = renderer
         self.keyboard_controllers = []
@@ -33,7 +25,12 @@ class EventHandler():
         self.camera_center = commands.CameraCenterCommand(rdr)
 
     def handle(self, event):
+        if event.type == pygame.QUIT:
+            self.exit_game.execute()
+
         if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                self.exit_game.execute()
             for controller in self.keyboard_controllers:
                 if event.key in controller.bindings:
                     control = controller.bindings[event.key]

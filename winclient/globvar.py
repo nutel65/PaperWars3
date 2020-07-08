@@ -8,7 +8,7 @@ scenes = {
 
 entities = []
 
-current_scene = 1
+scene = 0
 remaining_turn_time = 30
 player_turn = 0
 last_click_pos_global = None
