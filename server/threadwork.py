@@ -1,13 +1,15 @@
+import os
+import time
 import logging
 import selectors
-from server import servercli
-import threading
-import time
 import traceback
-import psycopg2
-import os
-
+import threading
 from collections import deque
+
+import psycopg2
+
+from server import servercli
+
 
 logger = logging.getLogger(__name__)
 

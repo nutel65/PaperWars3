@@ -1,5 +1,6 @@
-import logging
 import os
+import logging
+
 from server import utility
 
 logger = logging.getLogger("server")

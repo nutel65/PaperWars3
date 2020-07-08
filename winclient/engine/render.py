@@ -1,31 +1,35 @@
 """Provides classes for rendering graphics on the screen."""
-import pygame
 import os
 import functools
+import logging
+
+import pygame
+
 import assets
+import globvar
 from src import utils
-from src import commands
+from src import constants
 from engine.camera import Camera2D
 
+logger = logging.getLogger(__name__)
 
 class Renderer2D:
-    """2D rendering to screen."""
-    def __init__(self, entities_list):
-        self.entities_list = entities_list
-        os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (650, 30)
+    """2D rendering to the screen."""
+    def __init__(self):
+        os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (
+            constants.SDL_WINDOW_POS_X,
+            constants.SDL_WINDOW_POS_Y
+        )
         pygame.init()
-        pygame.display.set_caption("PaperWars")
-        self.MAX_FPS = 60
+        pygame.display.set_caption(constants.WINDOW_CAPTION)
         self.frame_clock = pygame.time.Clock()
         # append directly here in order render object
         self.render_request_list = []
         # holds pieces of screen to be updated
         self.dirty_rects = []
-        self.WINDOW_WIDTH = 640
-        self.WINDOW_HEIGHT = 480
-        self.DISPLAY_RECT = pygame.Rect(0, 0, self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
-        self.screen = pygame.display.set_mode((self.WINDOW_WIDTH, self.WINDOW_HEIGHT))
-        utils.log("Pygame display initialized")
+        self.DISPLAY_RECT = pygame.Rect(0, 0, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT)
+        self.screen = pygame.display.set_mode((constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT))
+        logger.info("Pygame display initialized")
         assets.load_textures()
         # array = utils.TilemapFileParser("assets/maps/test.tm").parse()
         # array = utils.TilemapFileParser("assets/maps/map1.tm").parse()
@@ -35,18 +39,7 @@ class Renderer2D:
         self.enqueue_all()
 
     def get_window_size(self):
-        return (self.WINDOW_WIDTH, self.WINDOW_HEIGHT)
-
-    # def get_entity_screen_rect(self, ent):
-    #     """Returns screen position (in form of pygame.Rect) for entity to be rendered to."""
-    #     if ent.SCREEN_STATIC:
-    #         # Static entities do not move alo
-    # ng with map.
-    #         return ent.rect
-    #     screen_x = (ent.rect.topleft[0] * self.camera.get_zoom()) - self.camera.rect.topleft[0] + self.DISPLAY_RECT.x
-    #     screen_y = (ent.rect.topleft[1] * self.camera.get_zoom()) - self.camera.rect.topleft[1] + self.DISPLAY_RECT.y
-    #     width, height = ent.rect.size
-    #     return utils.scale_rect(pygame.Rect(screen_x, screen_y, width, height), self.camera.get_zoom())
+        return (constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT)
 
     def _in_render_area(self, ent):
         """Returns True if entity is located in draw area."""
@@ -67,7 +60,6 @@ class Renderer2D:
     def _draw(self, entity):
         """Render single entity (call its draw() method)."""
         # TODO: Draw parially entities that are parially out of self.DISPLAY_RECT
-        # ent_screen_rect = self.get_entity_screen_rect(entity)
             
         if entity.SCREEN_STATIC:
             # Don't scale entity while it is SCREEN_STATIC.
@@ -88,11 +80,11 @@ class Renderer2D:
         # if entity.previous_rect is set, then use it instead of entity.rect
         rect_to_clear = entity.previous_rect
         if not rect_to_clear:
-            utils.log("Omitted _clear function.", type="DEBUG")
+            logger.debug("Omitted _clear function.")
             return 0
             # testing if works ^
         if entity.SCREEN_STATIC:
-            utils.log("clearing static object", type="DEBUG")
+            logger.debug("clearing static object", type="DEBUG")
             ent_screen_rect = rect_to_clear
         else:
             ent_screen_rect = utils.translate_to_screen_rect(rect_to_clear, self.camera)
@@ -102,10 +94,6 @@ class Renderer2D:
         size = utils.scale_rect(rect_to_clear, scale=zoom).size
         tr = pygame.Rect((x, y), size)
 
-        print("rect_to_clear", rect_to_clear)
-        print("screen_rect", ent_screen_rect)
-        print("tr", tr)
-        # print("transformed_rect", tr)
         self.screen.blit(self.background, ent_screen_rect.topleft, tr)
         self.dirty_rects.append(ent_screen_rect)
         entity.previous_rect = None
@@ -130,27 +118,27 @@ class Renderer2D:
         while self.render_request_list:
             ent = self.render_request_list.pop()
             if ent._hp <= 0:
-                utils.log("skipped rendering dead entity")
+                logger.debug("skipped rendering dead entity")
                 continue
             count2 = self._draw(ent)
             counter += count2
 
         if counter > 0:
-            utils.log(f"RENDERER: rendered total {counter} rectangles")
+            logger.info(f"RENDERER: rendered total {counter} rectangles")
 
         # update dirty rects
         pygame.display.update(self.dirty_rects)
         if self.dirty_rects:
-            utils.log(f"RENDERER:  updated total {len(self.dirty_rects)} rectangles")
+            logger.info(f"RENDERER:  updated total {len(self.dirty_rects)} rectangles")
         self.dirty_rects.clear()
-        self.frame_clock.tick(self.MAX_FPS)
+        self.frame_clock.tick(constants.MAX_FPS)
     
     def enqueue_all(self, from_iterable=None):
         """Add all entities to render_request_list from iterable
-        or self.entities_list (by default)
+        or globvar.entities (by default)
         """
         if not from_iterable:
-            from_iterable = self.entities_list
+            from_iterable = globvar.entities
         self.render_request_list.extend(from_iterable)
 
     def _redraw_tilemap(self):
@@ -160,11 +148,10 @@ class Renderer2D:
         x, y = self.camera.rect.topleft
         width, height = self.DISPLAY_RECT.size
         tmprect = pygame.Rect(x, y, width, height)
-        self.screen.fill((0, 128, 0))
+        self.screen.fill(constants.BACKGROUND_COLOR)
         self.background = self._tmr.render_full(scale=self.camera.get_zoom())
         self.screen.blit(self.background, self.DISPLAY_RECT, tmprect)
         self.dirty_rects.append(self.DISPLAY_RECT)
-        # utils.log("RENDERER: Rendered tilemap")
 
     def update_all(self):
         """Redraw every visible object, including background redraw.
@@ -182,7 +169,7 @@ class TilemapRenderer():
     def render_full(self, scale=1.0):
         """Renders whole tilemap and returns it as 'pygame.Surface'"""
         # Set new tile size.
-        ts = scale * 32
+        ts = scale * constants.TILE_SIZE
         # Get number of rows and columns in tilemap array.
         rows_num, cols_num = self._tilemap_array.shape
         # Create tilemap surface.

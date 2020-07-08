@@ -10,10 +10,11 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 
-from server import utility
-from server import threadwork
 from flask import Flask, render_template
 from flask_socketio import SocketIO
+
+from server import utility
+from server import threadwork
 
 # cd server
 # $env:FLASK_APP = "server/server.py"

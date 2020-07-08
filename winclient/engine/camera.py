@@ -1,12 +1,17 @@
 import pygame
+
 from src import utils
+from src import constants
 
 class Camera2D():
     """Alters field of view and rendering. Allows to change zoom, and move camera."""
     def __init__(self, renderer, camera_x, camera_y, view_width, view_height):
         self.renderer = renderer
         self.ZOOM_VALUES = [0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.75, 0.9, 1.0, 1.1, 1.25, 1.5, 1.8]
-        self.zoom_id = self.ZOOM_VALUES.index(1.0)
+        try:
+            self.zoom_id = self.ZOOM_VALUES.index(constants.DEFAULT_ZOOM)
+        except ValueError:
+            self.zoom_id = self.ZOOM_VALUES.index(1.0)
         # default rect used to scales 
         self._default_rect = pygame.Rect(camera_x, camera_y, view_width, view_height)
         # what camera sees
@@ -48,9 +53,9 @@ class Camera2D():
 
     def get_zoom(self):
         """Returns true zoom value."""
-        tile_size = 32
+        ts = constants.TILE_SIZE
         basic_zoom = self.ZOOM_VALUES[self.zoom_id]
-        true_zoom = int(tile_size * basic_zoom) / tile_size
+        true_zoom = int(ts * basic_zoom) / ts
         return true_zoom
 
 

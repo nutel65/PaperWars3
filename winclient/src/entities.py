@@ -1,10 +1,24 @@
 """Every game object that user interacts with, 
 should implements one of classes included in this module.
 """
-import assets
+import logging
+
 import pygame
+
+import assets
+import globvar
 from src import utils
 from src import commands
+
+logger = logging.getLogger(__name__)
+
+def add_ent(entity_type, *args, **kwargs):
+    """Easy and convenient way to add new entities."""
+    if entity_type == "soldier":
+        ent = Soldier(*args, **kwargs)
+    else:
+        raise ValueError(f"Entity type {entity_type} does not exist.")
+    globvar.entities.append(ent)
 
 class Entity2D():
     """Represents any game object"""
@@ -57,8 +71,6 @@ class Sprite(Drawable):
         """Set / change object position (top left corner) to given position (in pixels)."""
         self._set_previous_rect()
         self.rect.topleft = (x, y)
-        # print("prev rect", self.previous_rect)
-        # print("current rect", self.rect)
         self._renderer.render_request_list.append(self)
 
 class Soldier(Sprite):
@@ -71,18 +83,9 @@ class Soldier(Sprite):
         entity.minus_hp(self._ad)
 
     def minus_hp(self, amount):
-        utils.log("Entity is attacked")
+        logger.info("Entity is attacked")
         self._hp -= amount
         if self._hp <= 0:
-            utils.log("Entity killed")
+            logger.info("Entity killed")
             self._renderer.render_request_list.append(self)
             self._set_previous_rect()
-
-
-# class Tile(Drawable):
-#     """Represents single tile in tilemap."""
-#     def __init__(self, pos_px, texture_id):
-#         self.image = assets.TILEMAP_TEXTURES[texture_id]
-#         self.rect = self.image.get_rect
-#         self.rect.topleft = pos_px
-#         self.RENDER_PRIORITY = 1
