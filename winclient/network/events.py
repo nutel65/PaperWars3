@@ -3,31 +3,29 @@
 import sys
 import os
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
+import logging
+
+import socketio
 
 from server import statuscode
 from server import packetcode
-import socketio
-import logging
 
-username = "rafix"
-password = "rafix"
-target = "http://localhost:5000"
-# target = "https://paperwars.herokuapp.com"
-
-logging.basicConfig(level=logging.DEBUG,
-                        format='%(asctime)s %(name)-16s %(levelname)-8s %(message)s',
-                        datefmt='%m-%d %H:%M',
-                        # filename=f'./server/logs/{filename}',
-                        filemode='w+')
 logger = logging.getLogger(__name__)
 logging.getLogger("urllib3.connectionpool").setLevel(logging.INFO)
 
 sio = socketio.Client()
 
+target = "http://localhost:5000"
+# target = "https://paperwars.herokuapp.com"
+
+def log_in(username="rafix", password="rafix", target=target):
+    sio.emit(packetcode.LOGIN_REQUEST, {'username': username, 'password': password})
+
+
 @sio.event
 def connect():
     logger.info('connection established')
-    sio.emit(packetcode.LOGIN_REQUEST, {'username': username, 'password': password})
+    # TODO: show prompt to log in
 
 @sio.event
 def disconnect():
@@ -46,7 +44,9 @@ def login_response(data):
     else:
         logger.info(f"Login error. Status code: {data[status]}")
 
-if __name__ == "__main__":
+def run():
     sio.connect(target)
     sio.wait()
 
+if __name__ == "__main__":
+    run()

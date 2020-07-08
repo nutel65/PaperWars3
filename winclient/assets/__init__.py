@@ -8,8 +8,14 @@ constants:
     SOUNDTRACKS
     ICONS
 """
+import logging
+
 import pygame
+
 from src import utils
+from src import constants
+
+logger = logging.getLogger(__name__)
 
 TILEMAP_TEXTURES = None
 SPRITES = None
@@ -29,7 +35,7 @@ def load_all():
 
 def load_textures():
     global TILEMAP_TEXTURES 
-    textures = "winclient/assets/images/textures"
+    textures = f"{constants.ASSETS_PATH}/images/textures"
     TILEMAP_TEXTURES = {
         0: pygame.image.load(f"{textures}/default.png").convert(),
         1: pygame.image.load(f"{textures}/dirt.png").convert(),
@@ -39,22 +45,23 @@ def load_textures():
         5: pygame.image.load(f"{textures}/snow.png").convert(),
         6: pygame.image.load(f"{textures}/water.png").convert(),
     }
-    utils.log("assets.TILEMAP_TEXTURES initialized")
+    logger.info("assets.TILEMAP_TEXTURES initialized")
 
 
 def load_sprites():
     global SPRITES
 
-    red_square = pygame.Surface((32, 32))
-    red_square.fill((255, 0, 0))
+    ts = constants.TILE_SIZE
+    red_square = pygame.Surface((ts, ts))
+    red_square.fill(constants.COLOR_RED)
 
-    green_square = pygame.Surface((32, 32))
-    green_square.fill((0, 255, 0))
+    green_square = pygame.Surface((ts, ts))
+    green_square.fill(constants.COLOR_GREEN)
 
-    blue_square = pygame.Surface((32, 32))
-    blue_square.fill((0, 0, 255))
+    blue_square = pygame.Surface((ts, ts))
+    blue_square.fill(constants.COLOR_BLUE)
     
-    sprites = "winclient/assets/images/sprites"
+    sprites = f"{constants.ASSETS_PATH}/images/sprites"
     SPRITES = {
         "red_square": red_square,
         "green_square": green_square,
@@ -62,26 +69,26 @@ def load_sprites():
         "red_soldier": pygame.image.load(f"{sprites}/red_soldier32.png").convert_alpha(),
         "purple_soldier": pygame.image.load(f"{sprites}/purple_soldier32.png").convert_alpha(),
     }
-    utils.log("assets.SPRITES initialized")
+    logger.info("assets.SPRITES initialized")
 
 
 def load_icons():
     global ICONS
-    icons = "winclient/assets/images/icons"
+    icons = f"{constants.ASSETS_PATH}/images/icons"
     ICONS = {
         "crossed_circle": pygame.image.load(f"{icons}/cancel.png").convert_alpha(),
         "crossed_arrows": pygame.image.load(f"{icons}/move.png").convert_alpha(),
         "red_sword": pygame.image.load(f"{icons}/sword2.png").convert_alpha(),
     }
-    utils.log("assets.ICONS initialized")
+    logger.info("assets.ICONS initialized")
 
 
 def load_ui_elements():
     global UI_ELEMENTS
     UI_ELEMENTS = {
-        "hl_tile": pygame.image.load("winclient/assets/images/ui_elements/htwhite32.png").convert_alpha(),
+        "hl_tile": pygame.image.load(f"{constants.ASSETS_PATH}/images/ui_elements/htwhite32.png").convert_alpha(),
     }
-    utils.log("assets.UI_ELEMENTS initialized")
+    logger.info("assets.UI_ELEMENTS initialized")
 
 
 def load_sounds():
@@ -91,5 +98,5 @@ def load_sounds():
     FX_SOUNDS = {}
     
     SOUNDTRACKS = {}
-    utils.log("assets.FX_SOUNDS initialized")
-    utils.log("assets.SOUNDTRACKS initialized")
+    logger.info("assets.FX_SOUNDS initialized")
+    logger.info("assets.SOUNDTRACKS initialized")

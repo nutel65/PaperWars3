@@ -3,46 +3,14 @@ that is used often but didn't fit anywhere else.
 """
 import sys
 import os
-import pygame
-import numpy
 import functools
 from datetime import datetime
-from src import entities
-from pygame.locals import QUIT, KEYDOWN, K_ESCAPE
 
+import numpy
+import pygame
 
-# def index_to_px(index, shift=(0, 0)):
-#     x, y = index
-#     index = (x * 32 + shift[0], y * 32 + shift[1])
-#     return index
-
-
-# def px_to_index(px, shift=(0, 0)):
-#     x, y = px
-#     x -= shift[0]
-#     y -= shift[1]
-#     px = (x // 32, y // 32)
-#     return px
-
-
-# def shifted_point(coords, vector):
-#     x, y = coords
-#     xv, yv = vector
-#     return (x + xv, y + yv)
-
-
-# def shifted_rect(rect, vector):
-#     tmp_rect = rect.copy()
-#     x, y = tmp_rect.topleft
-#     tmp_rect.topleft = (x - vector[0], y - vector[1])
-#     return tmp_rect
-
-
-# class DotDict(dict):
-#     """dot.notation access to dictionary attributes"""
-#     __getattr__ = dict.get
-#     __setattr__ = dict.__setitem__
-#     __delattr__ = dict.__delitem__    
+import globvar
+from src import constants
 
 
 class TilemapFileParser():
@@ -91,10 +59,6 @@ def local_to_global(renderer, local_pos):
     zoom = renderer.camera.get_zoom()
     global_x = (local_pos[0] + renderer.camera.rect.x) / zoom + renderer.DISPLAY_RECT.x
     global_y = (local_pos[1] + renderer.camera.rect.y) / zoom + renderer.DISPLAY_RECT.y
-    ## DEBUG:
-    # ent = next(iter(game.entities))
-    # renderer.global.blit(ent.image, (global_x, global_y))
-    # pygame.display.flip()
     return (global_x, global_y)
 
 
@@ -117,11 +81,12 @@ def log(msg="", type="Info", time=True, output=print):
 
 
 def tile(tile_x, tile_y):
-    """Returns global position of from tile array indices.
+    """Returns global position from tile array indices.
     e.g tile(2, 1) -> (64, 32)
     """
-    tile_size = 32
-    return (tile_x * tile_size, tile_y * tile_size)
+    ts = constants.TILE_SIZE
+    return (tile_x * ts, tile_y * ts)
+
 
 def translate_to_screen_rect(rect, camera, display_rect=None):
         """Returns screen position (in form of pygame.Rect) for entity to be rendered to."""
@@ -133,3 +98,9 @@ def translate_to_screen_rect(rect, camera, display_rect=None):
         
         width, height = rect.size
         return scale_rect(pygame.Rect(screen_x, screen_y, width, height), zoom)
+
+
+def entity_at_pos(pos):
+    for ent in globvar.entities:
+        if ent.get_pos() == pos:
+            return ent

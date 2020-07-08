@@ -1,7 +1,14 @@
 """This module contains functions for handling user input."""
+import logging
+
 import pygame
+
+import globvar
 from src import commands
 from src import utils
+from src import constants
+
+logger = logging.getLogger(__name__)
 
 def pump_events(self):
     pygame.event.pump()
@@ -16,16 +23,14 @@ def exit_check(event):
 
 
 class EventHandler():
-    def __init__(self, game, renderer):
+    def __init__(self, renderer):
         self.renderer = rdr = renderer
         self.keyboard_controllers = []
-        self.game = game
-        self.exit_game = commands.ExitGameCommand(game, rdr)
-        self.zoom_in = commands.CameraZoomCommand(game, rdr, '+')
-        self.zoom_out = commands.CameraZoomCommand(game, rdr, '-')
-        # self.reset_zoom = commands.CameraZoomCommand(game, 1.0)
-        self.camera_move_by = commands.CameraMoveByCommand(game, rdr)
-        self.camera_center = commands.CameraCenterCommand(game, rdr)
+        self.exit_game = commands.ExitGameCommand(rdr)
+        self.zoom_in = commands.CameraZoomCommand(rdr, '+')
+        self.zoom_out = commands.CameraZoomCommand(rdr, '-')
+        self.camera_move_by = commands.CameraMoveByCommand(rdr)
+        self.camera_center = commands.CameraCenterCommand(rdr)
 
     def handle(self, event):
         if event.type == pygame.KEYDOWN:
@@ -35,7 +40,7 @@ class EventHandler():
                     args = control[1]
                     kwargs = control[2]
                     control[0].execute(*args, **kwargs)
-                    utils.log("Capturing external controller keybind", type="DEBUG")
+                    logger.debug("Capturing external controller keybind")
                     break
             self._handle_keydown(event)
         elif event.type == pygame.MOUSEBUTTONDOWN:
@@ -48,17 +53,16 @@ class EventHandler():
             self.zoom_in.execute()
         if event.key == pygame.K_MINUS:
             self.zoom_out.execute()
-        # if event.key == pygame.K_0:
-        #     self.reset_zoom.execute()
 
+        ts = constants.TILE_SIZE
         if event.key == pygame.K_LEFT:
-            self.camera_move_by.execute(-32, 0)
+            self.camera_move_by.execute(-ts, 0)
         if event.key == pygame.K_RIGHT:
-            self.camera_move_by.execute(32, 0)
+            self.camera_move_by.execute(ts, 0)
         if event.key == pygame.K_UP:
-            self.camera_move_by.execute(0, -32)
+            self.camera_move_by.execute(0, -ts)
         if event.key == pygame.K_DOWN:
-            self.camera_move_by.execute(0, 32)
+            self.camera_move_by.execute(0, ts)
 
         if event.key == pygame.K_RETURN:
             self.camera_center.execute()
@@ -66,12 +70,11 @@ class EventHandler():
     def _handle_mouse_click(self, event):
         # left click
         if event.button == 1:
-            glob_pos = self.game.client_state.mouse_pos_global
-            screen_pos = self.game.client_state.mouse_pos_window
-            utils.log(f"map: {glob_pos}; screen: {screen_pos}")
-            self.game.client_state.last_click_pos = glob_pos
+            screen_pos = pygame.mouse.get_pos()
+            glob_pos = utils.local_to_global(self.renderer, screen_pos)
+            logger.debug(f"map: {glob_pos}; screen: {screen_pos}")
+            globvar.last_click_pos_global = glob_pos
             # # center camera on clicked area
-            # self.camera_center_on.execute(glob_pos)
 
         # right click
         if event.button == 2:

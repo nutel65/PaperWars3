@@ -1,7 +1,6 @@
-"""Main menu scene. use run(game, assets) function to open scene."""
+"""Main menu scene. use run(renderer) function to open scene."""
 import assets
 
-def run(game, renderer):
+def run(renderer):
     while True:
-        game.pump_events()
         renderer.update()

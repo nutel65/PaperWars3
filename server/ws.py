@@ -1,10 +1,12 @@
 import logging
+
+from flask import request
+from flask_socketio import emit #, join_room, leave_room
+
 from server import statuscode
 from server import utility
 from server import packetcode
 from server.app import socketio, app, dbmanager
-from flask import request
-from flask_socketio import emit #, join_room, leave_room
 
 logger = logging.getLogger(__name__)
 active_users = {}
@@ -42,13 +44,3 @@ def on_login(message):
             "privilege": privilege,
         }
     emit(packetcode.LOGIN_RESPONSE, {'status': status}, room=sid)
-
-# @socketio.on(packetcode.LOGIN_REQUEST)
-# def ws_handshake(packet, client_sock):
-#     print("packet", packet)
-#     major = packet[0]
-#     minor = packet[1]
-#     patch = packet[2]
-#     print(f"Client version {major}.{minor}.{patch}")
-#     status = statuscode.HANDSHAKE_OK
-#     return status

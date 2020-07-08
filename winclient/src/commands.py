@@ -1,12 +1,17 @@
 """Top level API to execute specific tasks."""
 import sys
+import logging
+
+import pygame
+
 from src import utils
 # from src import entities
 
+logger = logging.getLogger(__name__)
+
 class Command:
     """Command pattern abstraction."""
-    def __init__(self, game_obj, renderer):
-        self.game = game_obj
+    def __init__(self, renderer):
         self.rdr = renderer
 
     def execute(self, *args, **kwargs):
@@ -38,6 +43,7 @@ class EntityAttackCommand(Command):
 
 class ExitGameCommand(Command):
     def execute(self):
+        logger.info("Executing exit command.")
         sys.exit(0)
 
 class CameraCenterCommand(Command):
@@ -49,15 +55,14 @@ class CameraZoomCommand(Command):
     """Zooms camera view by passed zoom parameter.
     zoom_mode can be either '+' or '-'.
     """
-    def __init__(self, game_obj, renderer, zoom_mode):
-        self.game = game_obj
+    def __init__(self, renderer, zoom_mode):
         self.rdr = renderer
         self.zoom_mode = zoom_mode
-        self.cam_move_by = CameraMoveByCommand(game_obj, renderer)
+        self.cam_move_by = CameraMoveByCommand(renderer)
 
     def execute(self):
         cam = self.rdr.camera
-        x1, y1 = self.game.client_state.mouse_pos_global
+        x1, y1 = utils.local_to_global(self.rdr, pygame.mouse.get_pos())
         # set zoom
         if self.zoom_mode == '+':
             zoom_change = 1
@@ -67,13 +72,11 @@ class CameraZoomCommand(Command):
             cam._set_zoom_id(cam.zoom_id + zoom_change)
         except ValueError:
             return
-        self.game.update_client_state(self.rdr)
 
-        x2, y2 = p2 = self.game.client_state.mouse_pos_global
+        x2, y2 = utils.local_to_global(self.rdr, pygame.mouse.get_pos())
         diff = (x1 - x2, y1 - y2)
-        print("***********8")
         self.cam_move_by.execute(*diff)
-        utils.log(f"Camera ZOOM on: GLOBAL:{p2}; {cam}")
+        logger.debug(f"Camera ZOOM on: GLOBAL:{(x2, y2)}; {cam}")
 
 
 class CameraMoveByCommand(Command):
@@ -85,7 +88,7 @@ class CameraMoveByCommand(Command):
         shift_y *= cam.get_zoom()
         new_topleft = (x + shift_x, y + shift_y)
         cam.set_topleft(new_topleft)
-        utils.log(f"Camera MOVE: {cam}")
+        logger.debug(f"Camera MOVE: {cam}")
 
 
 class PauseGameCommand(Command):
