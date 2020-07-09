@@ -17,6 +17,7 @@ def run(renderer, server_url):
     network_service = threading.Thread(target=network.connect, args=(server_url,))
     network_service.start()
     # idk man
+    # TODO: show loading screen or sth
     network_service.join()
     network.log_in(username="rafix", password="rafix")
 
