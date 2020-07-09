@@ -1,5 +1,5 @@
 """Top level API to execute specific tasks."""
-import sys
+import os
 import logging
 
 import pygame
@@ -44,7 +44,9 @@ class EntityAttackCommand(Command):
 class ExitGameCommand(Command):
     def execute(self):
         logger.info("Executing exit command.")
-        sys.exit(0)
+        # sys.exit(0)
+        # close connections or so
+        os._exit(0)
 
 class CameraCenterCommand(Command):
     def execute(self):
