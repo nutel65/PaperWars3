@@ -24,8 +24,8 @@ class CustomCommand(Command):
         self.args = args
         self.kwargs = kwargs
 
-    def execute(self):
-        return self.func(*self.args, **self.kwargs)
+    def execute(self, *args2, **kwargs2):
+        return self.func(*self.args, *args2, **self.kwargs, **kwargs2)
 
 
 class EntityMoveCommand(Command):

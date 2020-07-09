@@ -2,7 +2,7 @@
 import logging
 
 from src import constants
-from src.scenes import multiplayer_game 
+from src.scenes import main_menu, multiplayer_game
 from engine.render import Renderer2D
 
 logging.basicConfig(
@@ -18,4 +18,5 @@ renderer = Renderer2D()
 
 if __name__ == "__main__":
     # multiplayer_game.run(renderer, constants.LOCAL_SERVER_URL)
-    multiplayer_game.run(renderer, constants.PRODUCTION_SERVER_URL)
+    # multiplayer_game.run(renderer, constants.PRODUCTION_SERVER_URL)
+    main_menu.run(renderer, constants.PRODUCTION_SERVER_URL)

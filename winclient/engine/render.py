@@ -24,11 +24,15 @@ class Renderer2D:
         pygame.display.set_caption(constants.WINDOW_CAPTION)
         self.frame_clock = pygame.time.Clock()
         # append directly here in order render object
-        self.render_request_list = []
         # holds pieces of screen to be updated
         self.dirty_rects = []
-        self.DISPLAY_RECT = pygame.Rect(0, 0, constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT)
-        self.screen = pygame.display.set_mode((constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT))
+        screen_size = (constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT)
+        self.DISPLAY_RECT = pygame.Rect((0, 0), screen_size)
+        self.screen = pygame.display.set_mode(screen_size)
+        self.background = pygame.Surface(screen_size)
+        self.background.fill(constants.BACKGROUND_COLOR)
+        self.screen.blit(self.background, (0, 0))
+        pygame.display.flip()
         logger.info("Pygame display initialized")
         assets.load_textures()
         # array = utils.TilemapFileParser("assets/maps/test.tm").parse()
@@ -36,7 +40,7 @@ class Renderer2D:
         array = utils.TilemapFileParser("winclient/assets/maps/calib_map.tm").parse()
         self._tmr = TilemapRenderer(array)
         self.camera = Camera2D(self, *self._tmr.render_full().get_rect())
-        self.enqueue_all()
+        self.enqueue_all() # just in case renderer didn't load earlier
 
     def get_window_size(self):
         return (constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT)
@@ -78,13 +82,17 @@ class Renderer2D:
     def _clear(self, entity):
         """Draw background over last object's position."""
         # if entity.previous_rect is set, then use it instead of entity.rect
-        rect_to_clear = entity.previous_rect
+        # try:
+        rect_to_clear = getattr(entity, "previous_rect", None)
+        # except AttributeError:
+        #     logger.debug("Omitted _clear function - no previous_rect_attribute.")
+        #     return 0
         if not rect_to_clear:
             logger.debug("Omitted _clear function.")
             return 0
             # testing if works ^
         if entity.SCREEN_STATIC:
-            logger.debug("clearing static object", type="DEBUG")
+            logger.debug("clearing static object")
             ent_screen_rect = rect_to_clear
         else:
             ent_screen_rect = utils.translate_to_screen_rect(rect_to_clear, self.camera)
@@ -100,24 +108,24 @@ class Renderer2D:
         return 1
 
     def update(self):
-        """Processes render_request_list and dirty_rects.
+        """Processes globvar.render_request_list and dirty_rects.
         Call this at the end of main loop.
         """ 
         counter = 0
-        for ent in self.render_request_list:
+        for ent in globvar.render_request_list:
             count1 = self._clear(ent)
             counter += count1
 
         # Filter out redundant entities to draw .
-        self.render_request_list = list(filter(self._in_render_area, self.render_request_list))
+        globvar.render_request_list = list(filter(self._in_render_area, globvar.render_request_list))
 
         # sort render_request_list to preserve proper order of rendering
-        self.render_request_list.sort(key=lambda x: x.RENDER_PRIORITY, reverse=True)
+        globvar.render_request_list.sort(key=lambda x: x.RENDER_PRIORITY, reverse=True)
 
         # redraw each element in render list and then remove them from that list
-        while self.render_request_list:
-            ent = self.render_request_list.pop()
-            if ent._hp <= 0:
+        while globvar.render_request_list:
+            ent = globvar.render_request_list.pop()
+            if getattr(ent, "hidden", False):
                 logger.debug("skipped rendering dead entity")
                 continue
             count2 = self._draw(ent)
@@ -134,12 +142,12 @@ class Renderer2D:
         self.frame_clock.tick(constants.MAX_FPS)
     
     def enqueue_all(self, from_iterable=None):
-        """Add all entities to render_request_list from iterable
-        or globvar.entities (by default)
+        """Add all entities from iterable to render_request_list.
+        If from_iterable is not supplied globvar.entities (by default)
         """
         if not from_iterable:
-            from_iterable = globvar.entities
-        self.render_request_list.extend(from_iterable)
+            from_iterable = globvar.entities + globvar.widgets
+        globvar.render_request_list.extend(from_iterable)
 
     def _redraw_tilemap(self):
         """Clear screen and draw tilemap. Does not redraw entities
@@ -175,10 +183,10 @@ class TilemapRenderer():
         # Create tilemap surface.
         result_surface = pygame.Surface((cols_num * ts, rows_num * ts))
         # Default texture if texture id not found in assets.
-        default = assets.TILEMAP_TEXTURES[0]
+        default = assets.TEXTURES[0]
         for i in range(rows_num):
             for n_row, item_id in enumerate(self._tilemap_array[i]):
-                texture = assets.TILEMAP_TEXTURES.get(item_id, default)
+                texture = assets.TEXTURES.get(item_id, default)
                 scaled_texture = utils.scale_image(texture, scale)
                 result_surface.blit(scaled_texture, (n_row * ts, i * ts))
         return result_surface

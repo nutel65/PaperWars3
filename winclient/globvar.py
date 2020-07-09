@@ -7,6 +7,9 @@ scenes = {
 }
 
 entities = []
+widgets = []
+render_request_list = []
+
 
 scene = 0
 remaining_turn_time = 30

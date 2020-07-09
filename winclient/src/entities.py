@@ -5,20 +5,17 @@ import logging
 
 import pygame
 
-import assets
 import globvar
 from src import utils
 from src import commands
 
 logger = logging.getLogger(__name__)
 
-def add_ent(entity_type, *args, **kwargs):
-    """Easy and convenient way to add new entities."""
-    if entity_type == "soldier":
-        ent = Soldier(*args, **kwargs)
-    else:
-        raise ValueError(f"Entity type {entity_type} does not exist.")
-    globvar.entities.append(ent)
+def get_sprite_at(pos_px):
+    # TODO: TEST IT
+    for ent in globvar.entities:
+        if ent.rect.collidepoit(pos_px):
+            return ent
 
 class Entity2D():
     """Represents any game object"""
@@ -30,15 +27,17 @@ class Entity2D():
 
 
 class Drawable(Entity2D):
-    """Represents object that can be drawn"""
-    def __init__(self, *args, **kwargs):
-        # NOTE: SCREEN_STATIC has precedence over MAP_STATIC
-        self.RENDER_PRIORITY = 1 # int
-        self.MAP_STATIC = False # if true object behaves like part of map while rendering
-        self.SCREEN_STATIC = False # determines whether object moves / zooms along with camera
-        self.image = None # pygame.Surface
-        self.rect = None # pygame.Rect
-        raise NotImplementedError("Override this method")
+    """Represents object that can be drawn.
+    Interface variables:
+    image (required) <pygame.Surface>
+    rect (required) <pygame.Rect>
+    previous_rect (optional) <pygame.Rect> # set it, after object moved
+    hidden # if True, skip the entity during rendering.
+    """
+    # NOTE: SCREEN_STATIC has precedence over MAP_STATIC
+    RENDER_PRIORITY = 1 # int
+    MAP_STATIC = False # if true object behaves like part of map while rendering
+    SCREEN_STATIC = False # determines whether object moves / zooms along with camera
 
     def draw(self, dest_surf, pos_px, area=None, scale=1.0):
         """Intended to be called from renderer.
@@ -46,19 +45,6 @@ class Drawable(Entity2D):
         """
         scaled_image = utils.scale_image(self.image, scale)
         dest_surf.blit(scaled_image, pos_px, area)
-
-
-class Sprite(Drawable):
-    """Entity representable with single image."""
-    def __init__(self, pos_px, image, renderer):
-        self.RENDER_PRIORITY = 2
-        self.MAP_STATIC = True
-        self.SCREEN_STATIC = False
-        self.image = assets.SPRITES[image]
-        self.rect = self.image.get_rect()
-        self.rect.topleft = pos_px
-        self._renderer = renderer
-        self.previous_rect = None # set after changinging object's position
 
     def get_pos(self):
         """Return global top left position of entity (in pixels)."""
@@ -71,11 +57,21 @@ class Sprite(Drawable):
         """Set / change object position (top left corner) to given position (in pixels)."""
         self._set_previous_rect()
         self.rect.topleft = (x, y)
-        self._renderer.render_request_list.append(self)
+        globvar.render_request_list.append(self)
+
+
+class Sprite(Drawable):
+    """Entity representable with single image."""
+    MAP_STATIC = True
+    def __init__(self, pos_px, image):
+        self.image = image
+        self.rect = self.image.get_rect()
+        self.rect.topleft = pos_px
+
 
 class Soldier(Sprite):
-    def __init__(self, pos_px, image, renderer):
-        super().__init__(pos_px, image, renderer)
+    def __init__(self, pos_px, image):
+        super().__init__(pos_px, image)
         self._hp = 5
         self._ad = 2
 
@@ -87,5 +83,6 @@ class Soldier(Sprite):
         self._hp -= amount
         if self._hp <= 0:
             logger.info("Entity killed")
-            self._renderer.render_request_list.append(self)
+            self.hidden = True # TODO: Delete the entity permamently
+            globvar.render_request_list.append(self)
             self._set_previous_rect()

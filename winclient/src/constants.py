@@ -15,7 +15,7 @@ PRODUCTION_SERVER_URL = "https://paperwars.herokuapp.com"
 BACKGROUND_COLOR = (0, 128, 0)
 COLOR_RED = (255, 0, 0)
 COLOR_GREEN = (0, 255, 0)
-COLOR_BLUE = (0, 0, 25)
+COLOR_BLUE = (0, 0, 255)
 
 # SCENES
 MAIN_MENU_SCENE = 0
