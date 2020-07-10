@@ -27,7 +27,7 @@ class Button(Widget):
     - fill_color is ignored
     """
     def __init__(
-            self, 
+            self,
             topleft_pos,
             button_size=None,
             fill_color=None,
@@ -59,4 +59,23 @@ class Button(Widget):
         )
 
 class TextArea(Widget):
-    pass
+    def __init__(
+            self,
+            topleft_pos_perc, # in % of screen size
+            size_perc=None, # in % of screen size
+            fill_color=None,
+            background_image=None,
+            # desc_on_hover="",
+            # desc_on_click="",
+        ):
+        if background_image:
+            self.image = background_image
+        elif widget_size:
+            if not fill_color:
+                raise ValueError("fill_color not specified.")
+            self.image = pygame.Surface(widget_size)
+            self.image.fill(fill_color)
+        else:
+            raise ValueError("size or background_image not supplied.")
+        self.rect = self.image.get_rect()
+        self.rect.topleft = topleft_pos

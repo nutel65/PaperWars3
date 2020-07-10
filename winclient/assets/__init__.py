@@ -1,12 +1,5 @@
 """This file loads audio, images, animation and other assets.
 Init assets with 'load_all()' before use.
-constants:
-    TEXTURES
-    SPRITES
-    OTHER_IMAGES
-    FX_SOUNDS
-    SOUNDTRACKS
-    ICONS
 """
 import os
 import logging
@@ -21,7 +14,7 @@ logger = logging.getLogger(__name__)
 TEXTURES = None
 SPRITES = None
 ICONS = None
-UI_ELEMENTS = None
+BUTTONS = None
 FX_SOUNDS = None
 SOUNDTRACKS = None
 
@@ -29,7 +22,7 @@ SOUNDTRACKS = None
 def load_all():
     load_sprites()
     load_textures()
-    load_ui_elements()
+    load_buttons()
     load_icons()
     load_sounds()
 
@@ -37,7 +30,7 @@ def load_all():
 def load_textures():
     global TEXTURES 
     textures_path = f"{constants.ASSETS_PATH}/images/textures"
-    TEXTURES = map_dir_to_dict(
+    TEXTURES = _map_dir_to_dict(
         textures_path,
         lambda filename: int(filename[:filename.index("_")]),
         lambda filename: pygame.image.load(f"{textures_path}/{filename}").convert()
@@ -64,9 +57,8 @@ def load_sprites():
         "green_square": green_square,
         "blue_square": blue_square,
     }
-    # SPRITES.update()
-    sprites_path = f"{constants.ASSETS_PATH}/images/ui_elements"
-    SPRITES.update(map_dir_to_dict(
+    sprites_path = f"{constants.ASSETS_PATH}/images/buttons"
+    SPRITES.update(_map_dir_to_dict(
         sprites_path,
         lambda filename: filename[:filename.index(".")],
         lambda filename: pygame.image.load(f"{sprites_path}/{filename}").convert()
@@ -77,7 +69,7 @@ def load_sprites():
 def load_icons():
     global ICONS
     icons_path = f"{constants.ASSETS_PATH}/images/icons"
-    ICONS = map_dir_to_dict(
+    ICONS = _map_dir_to_dict(
         icons_path,
         lambda filename: filename[:filename.index(".")],
         lambda filename: pygame.image.load(f"{icons_path}/{filename}").convert()
@@ -85,18 +77,18 @@ def load_icons():
     logger.info("assets.ICONS initialized")
 
 
-def load_ui_elements():
-    global UI_ELEMENTS
-    # UI_ELEMENTS = {
-    #     "hl_tile": pygame.image.load(f"{constants.ASSETS_PATH}/images/ui_elements/htwhite32.png").convert_alpha(),
+def load_buttons():
+    global BUTTONS
+    # buttons = {
+    #     "hl_tile": pygame.image.load(f"{constants.ASSETS_PATH}/images/buttons/htwhite32.png").convert_alpha(),
     # }
-    ui_elements_path = f"{constants.ASSETS_PATH}/images/ui_elements"
-    UI_ELEMENTS = map_dir_to_dict(
-        ui_elements_path,
+    buttons_path = f"{constants.ASSETS_PATH}/images/buttons"
+    BUTTONS = _map_dir_to_dict(
+        buttons_path,
         lambda filename: filename[:filename.index(".")],
-        lambda filename: pygame.image.load(f"{ui_elements_path}/{filename}").convert()
+        lambda filename: pygame.image.load(f"{buttons_path}/{filename}").convert()
     )
-    logger.info("assets.UI_ELEMENTS initialized")
+    logger.info("assets.buttons initialized")
 
 
 def load_sounds():
@@ -109,7 +101,7 @@ def load_sounds():
     # logger.info("assets.SOUNDTRACKS initialized")
 
 
-def map_dir_to_dict(dirpath, key_func, value_func, key_func_args=[], value_func_args=[]):
+def _map_dir_to_dict(dirpath, key_func, value_func, key_func_args=[], value_func_args=[]):
     """Returns dictionary for every filename in dirpatch, where:
     keys are return results of calling key_func with filename, and
     values are return results of calling value_func with filename.
@@ -118,6 +110,7 @@ def map_dir_to_dict(dirpath, key_func, value_func, key_func_args=[], value_func_
         key_func(filename, *key_func_args): value_func(filename, *value_func_args)
         for filename
         in os.listdir(dirpath)
+        if filename.endswith(".png")
     }
     
 

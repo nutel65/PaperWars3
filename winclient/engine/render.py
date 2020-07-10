@@ -87,7 +87,11 @@ class Renderer2D:
         # except AttributeError:
         #     logger.debug("Omitted _clear function - no previous_rect_attribute.")
         #     return 0
-        if not rect_to_clear:
+        if entity.image.get_flags() & pygame.SRCALPHA:
+            logger.debug("_clear forced for SRCALPHA surface")
+        elif entity.image.get_alpha and entity.image.get_alpha < 255:
+            logger.debug("_clear forced for surface with set alpha level.")
+        elif not rect_to_clear:
             logger.debug("Omitted _clear function.")
             return 0
             # testing if works ^
