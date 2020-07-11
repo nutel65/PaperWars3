@@ -1,6 +1,7 @@
 """PaperWars Windows client // entry point."""
 import logging
 
+import globvar
 from src import constants
 from src.scenes import main_menu, multiplayer_game
 from engine.render import Renderer2D
@@ -14,6 +15,7 @@ logging.basicConfig(
 )
 logging.getLogger("urllib3.connectionpool").setLevel(logging.INFO)
 
+globvar.reset()
 renderer = Renderer2D()
 
 if __name__ == "__main__":

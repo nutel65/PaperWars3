@@ -79,7 +79,7 @@ class InputHandler():
 
         if globvar.scene == constants.MULTIPLAYER_GAME_SCENE:
             glob_pos = utils.local_to_global(self.renderer, screen_pos)
-            globvar.last_click_pos_global = glob_pos
+            # globvar.last_click_pos_global = glob_pos
 
             # in-game left click
             if event.button == 1:
@@ -101,7 +101,11 @@ class InputHandler():
         elif globvar.scene == constants.MAIN_MENU_SCENE:
             pass
         
-        logger.debug(f"map: {glob_pos}; screen: {screen_pos}")
+        w = constants.WINDOW_WIDTH
+        h = constants.WINDOW_HEIGHT
+        wp = int(screen_pos[0] / w * 100)
+        hp = int(screen_pos[1] / h * 100)
+        logger.debug(f"map: {glob_pos}; screen: {screen_pos}, (w={wp}%, h={hp}%)")
 
     def _handle_mouse_motion(self, event):
         ...

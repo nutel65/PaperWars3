@@ -2,6 +2,7 @@
 import os
 import functools
 import logging
+import time
 
 import pygame
 
@@ -41,6 +42,7 @@ class Renderer2D:
         self._tmr = TilemapRenderer(array)
         self.camera = Camera2D(self, *self._tmr.render_full().get_rect())
         self.enqueue_all() # just in case renderer didn't load earlier
+
 
     def get_window_size(self):
         return (constants.WINDOW_WIDTH, constants.WINDOW_HEIGHT)
@@ -83,24 +85,37 @@ class Renderer2D:
         """Draw background over last object's position."""
         # if entity.previous_rect is set, then use it instead of entity.rect
         # try:
+        
         rect_to_clear = getattr(entity, "previous_rect", None)
         # except AttributeError:
         #     logger.debug("Omitted _clear function - no previous_rect_attribute.")
         #     return 0
         if entity.image.get_flags() & pygame.SRCALPHA:
             logger.debug("_clear forced for SRCALPHA surface")
-        elif entity.image.get_alpha and entity.image.get_alpha < 255:
+            # FIXME: Probably buggy code here.
+            for ent in globvar.entities:
+                if entity.rect.colliderect(ent.rect):
+                    if ent not in globvar.render_request_list:
+                        logger.warning(
+                            f"[bug risk] detected underlying object to blit ({ent}),"
+                            f"adding it to render_request_list.")
+                        globvar.render_request.append(ent)
+
+        elif entity.image.get_alpha() and entity.image.get_alpha() < 255:
             logger.debug("_clear forced for surface with set alpha level.")
         elif not rect_to_clear:
             logger.debug("Omitted _clear function.")
             return 0
             # testing if works ^
+        if not rect_to_clear:
+            rect_to_clear = entity.rect
         if entity.SCREEN_STATIC:
             logger.debug("clearing static object")
             ent_screen_rect = rect_to_clear
         else:
             ent_screen_rect = utils.translate_to_screen_rect(rect_to_clear, self.camera)
         zoom = self.camera.get_zoom()
+        
         x = rect_to_clear.x * zoom
         y = rect_to_clear.y * zoom
         size = utils.scale_rect(rect_to_clear, scale=zoom).size
@@ -115,18 +130,26 @@ class Renderer2D:
         """Processes globvar.render_request_list and dirty_rects.
         Call this at the end of main loop.
         """ 
+        start_time = time.time()
+
+        # clear
+        clear_start = time.time()
         counter = 0
         for ent in globvar.render_request_list:
             count1 = self._clear(ent)
             counter += count1
+        clear_time = (time.time() - clear_start) * 1000
 
+        filter_sort_start = time.time()
         # Filter out redundant entities to draw .
         globvar.render_request_list = list(filter(self._in_render_area, globvar.render_request_list))
-
         # sort render_request_list to preserve proper order of rendering
         globvar.render_request_list.sort(key=lambda x: x.RENDER_PRIORITY, reverse=True)
+        filter_sort_time = (time.time() - filter_sort_start) * 1000
 
-        # redraw each element in render list and then remove them from that list
+
+        # draw each element in render list and then remove them from that list
+        draw_start = time.time()
         while globvar.render_request_list:
             ent = globvar.render_request_list.pop()
             if getattr(ent, "hidden", False):
@@ -134,15 +157,28 @@ class Renderer2D:
                 continue
             count2 = self._draw(ent)
             counter += count2
+        draw_time = (time.time() - draw_start) * 1000
+        
 
         if counter > 0:
             logger.info(f"RENDERER: rendered total {counter} rectangles")
 
         # update dirty rects
+        display_update_start = time.time()
         pygame.display.update(self.dirty_rects)
         if self.dirty_rects:
             logger.info(f"RENDERER:  updated total {len(self.dirty_rects)} rectangles")
         self.dirty_rects.clear()
+        display_update_time = (time.time() - display_update_start) * 1000
+
+        max_frame_time = 1000 / constants.MAX_FPS
+        frame_time = (time.time() - start_time) * 1000
+        frame_time_usage_percent = int(frame_time / max_frame_time * 100)
+        if frame_time_usage_percent > 90:
+            logger.warning(
+                f"Frame time: {frame_time_usage_percent}% [{int(frame_time)} ms] "
+                f"(clear: {int(clear_time)} ms, draw: {int(draw_time)} ms, display: {int(display_update_time)} ms, "
+                f"filter and sort: {int(filter_sort_time)} ms.)")
         self.frame_clock.tick(constants.MAX_FPS)
     
     def enqueue_all(self, from_iterable=None):

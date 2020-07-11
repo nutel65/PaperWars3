@@ -67,6 +67,7 @@ class Sprite(Drawable):
         self.image = image
         self.rect = self.image.get_rect()
         self.rect.topleft = pos_px
+        globvar.entities.append(self)
 
 
 class Soldier(Sprite):
