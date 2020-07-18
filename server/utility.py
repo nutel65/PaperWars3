@@ -4,10 +4,10 @@ import binascii
 import secrets
 import json
 
-from flask_socketio import join_room, leave_room
+from flask_socketio import join_room, leave_room, emit
 import msgpack
 
-from server import statuscode
+from server import statuscode, packetcode
 from server.ws import logged_in_users
 
 logger = logging.getLogger(__name__)
@@ -35,7 +35,7 @@ class GameRoom():
         return statuscode.OK
 
     def start_game(self):
-        ...
+        emit(packetcode.GAME_START, room=self.id, broadcast=True, include_self=False)
 
     def __repr__(self):
         return json.dumps({
@@ -43,6 +43,9 @@ class GameRoom():
             "players_count": len(self.players),
             "max_players": self.max_players,
         })
+
+    def __del__(self):
+        emit(packetcode.ROOM_CLOSE, room=self.id, broadcast=True, include_self=False)
 
 # class Client():
 #     def __init__(self, socket, ip_addr):

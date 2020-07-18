@@ -86,6 +86,9 @@ def on_join_room(data):
     else:
         status = statuscode.PERMISSION_DENIED
     emit(packetcode.JOIN_ROOM_RESPONSE, {"status": status}, room=sid)
+    if status == statuscode.OK and len(rooms[room_id].players) == 2:
+        logger.info(f"Room full, starting game (id={room_id})")
+        rooms[room_id].start_game()
 
 
 @socketio.on(packetcode.REQUEST_GAME_LIST)
