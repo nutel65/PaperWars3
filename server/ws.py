@@ -10,7 +10,7 @@ from server import packetcode
 from server.app import socketio, app, dbmanager, rooms
 
 logger = logging.getLogger(__name__)
-active_users = {}
+logged_in_users = {}
 
 @socketio.on('connect')
 def on_connect():
@@ -19,9 +19,9 @@ def on_connect():
 
 @socketio.on('disconnect')
 def on_disconnect():
-    popped = active_users.pop(request.sid, default=None)
+    popped = logged_in_users.pop(request.sid, default=None)
     if popped:
-        logger.info(f'Logged client disconnected. Removed from active_users. Active users now: {len(active_users)}')
+        logger.info(f'Logged client disconnected. Removed from logged_in_users. Active users now: {len(logged_in_users)}')
     else:
         logger.info("Guest client just disconnected.")
 
@@ -41,7 +41,7 @@ def on_login(data):
             privilege = 'a'
         else:
             privilege = 'u'
-        active_users[sid] = {
+        logged_in_users[sid] = {
             "username": username,
             "room": "/lobby",
             "privilege": privilege,
@@ -75,13 +75,16 @@ def on_create_room(data):
 def on_join_room(data):
     logger.debug(data)
     sid = request.sid
-    try:
-        room_id = data["room_id"]
-        status = rooms[room_id].assign_player(active_users[sid])
-    except KeyError:
-        status = statuscode.MISSING_PARAMETERS
-    except:
-        status = statuscode.INTERNAL_ERROR
+    if sid in logged_in_users:
+        try:
+            room_id = data["room_id"]
+            status = rooms[room_id].assign_player(logged_in_users[sid])
+        except KeyError:
+            status = statuscode.MISSING_PARAMETERS
+        except:
+            status = statuscode.INTERNAL_ERROR
+    else:
+        status = statuscode.PERMISSION_DENIED
     emit(packetcode.JOIN_ROOM_RESPONSE, {"status": status}, room=sid)
 
 

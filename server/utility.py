@@ -8,7 +8,7 @@ from flask_socketio import join_room, leave_room
 import msgpack
 
 from server import statuscode
-from server.ws import active_users
+from server.ws import logged_in_users
 
 logger = logging.getLogger(__name__)
 
@@ -66,7 +66,7 @@ def validate_credentials(dbmanager, username, password):
 # def logged_only(func, *args, **kwargs):
 #     def wrapper():
 #         sid = request.sid
-#         if sid in active_users:
+#         if sid in logged_in_users:
 #             func(*args, **kwargs)
 #         else:
 #             emit(packetcode.LOGIN_RESPONSE, {'status': status}, room=sid)
