@@ -7,7 +7,7 @@ from flask_socketio import emit #, join_room, leave_room
 from server import statuscode
 from server import utility
 from server import packetcode
-from server.app import socketio, app, dbmanager, rooms
+from server.app import app, dbmanager, rooms, socketio
 
 logger = logging.getLogger(__name__)
 logged_in_users = {}
@@ -19,10 +19,10 @@ def on_connect():
 
 @socketio.on('disconnect')
 def on_disconnect():
-    popped = logged_in_users.pop(request.sid, default=None)
-    if popped:
+    try:
+        logged_in_users.pop(request.sid)
         logger.info(f'Logged client disconnected. Removed from logged_in_users. Active users now: {len(logged_in_users)}')
-    else:
+    except KeyError:
         logger.info("Guest client just disconnected.")
 
 
@@ -47,17 +47,7 @@ def on_login(data):
             "privilege": privilege,
         }
     emit(packetcode.LOGIN_RESPONSE, {'status': status}, room=sid)
-
-
-# @socketio.on(packetcode.CHANGE)
-# def CHANGE(data):
-#     logger.debug(data)
-#     CHANGE = data.get()
-#     sid = request.sid
     
-#     emit(packet
-# code.CHANGE, {'status': status}, room=sid)
-
 
 @socketio.on(packetcode.CREATE_ROOM_REQUEST)
 def on_create_room(data):

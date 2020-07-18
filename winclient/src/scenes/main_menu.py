@@ -30,7 +30,7 @@ def run(renderer, server_url):
     input_handler = controls.InputHandler(renderer)
 
     debug_command = commands.CustomCommand(print, "testing custom command")
-    btn1 = widgets.Button(
+    btn2 = widgets.Button(
         topleft_pos_perc=(10, 10),
         button_size=(50, 50),
         fill_color=constants.COLOR_RED,

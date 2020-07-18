@@ -8,7 +8,6 @@ from flask_socketio import join_room, leave_room, emit
 import msgpack
 
 from server import statuscode, packetcode
-from server.ws import logged_in_users
 
 logger = logging.getLogger(__name__)
 

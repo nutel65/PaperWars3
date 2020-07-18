@@ -1,4 +1,6 @@
 # Server response codes
+# Error codes: 1 <= x <= 127
+# Other codes: >= 128
 OK = LOGIN_OK = 0
 NOT_IMPLEMENTED = 1
 ROOM_FULL = 2

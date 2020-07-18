@@ -21,4 +21,5 @@ renderer = Renderer2D()
 if __name__ == "__main__":
     # multiplayer_game.run(renderer, constants.LOCAL_SERVER_URL)
     # multiplayer_game.run(renderer, constants.PRODUCTION_SERVER_URL)
-    main_menu.run(renderer, constants.PRODUCTION_SERVER_URL)
+    # main_menu.run(renderer, constants.PRODUCTION_SERVER_URL)
+    main_menu.run(renderer, constants.LOCAL_SERVER_URL)

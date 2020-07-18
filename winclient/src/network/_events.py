@@ -36,5 +36,5 @@ def login_response(data):
     elif status == statuscode.INCORRECT_PASSWORD:
         logger.info("SERVER: Incorrect password")
     else:
-        logger.info(f"SERVER: Login error. Status code: {data[status]}")
+        logger.info(f"SERVER: Login error. Status code: {data['status']}")
 
