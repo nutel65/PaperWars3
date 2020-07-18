@@ -28,11 +28,15 @@ class Entity2D():
 
 class Drawable(Entity2D):
     """Represents object that can be drawn.
+
     Interface variables:
     image (required) <pygame.Surface>
     rect (required) <pygame.Rect>
     previous_rect (optional) <pygame.Rect> # set it, after object moved
     hidden # if True, skip the entity during rendering.
+
+    Required methods:
+    draw()
     """
     # NOTE: SCREEN_STATIC has precedence over MAP_STATIC
     RENDER_PRIORITY = 1 # int

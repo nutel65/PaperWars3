@@ -11,6 +11,7 @@ from src import commands
 from src import entities
 from src import network
 from src import widgets
+from src import pygame_textinput
 from src.scenes import multiplayer_game
 
 logger = logging.getLogger(__name__)
@@ -30,12 +31,12 @@ def run(renderer, server_url):
     input_handler = controls.InputHandler(renderer)
 
     debug_command = commands.CustomCommand(print, "testing custom command")
-    btn2 = widgets.Button(
-        topleft_pos_perc=(10, 10),
-        button_size=(50, 50),
-        fill_color=constants.COLOR_RED,
-        command=debug_command,
-    )
+    # btn2 = widgets.Button(
+    #     topleft_pos_perc=(10, 10),
+    #     button_size=(50, 50),
+    #     fill_color=constants.COLOR_RED,
+    #     command=debug_command,
+    # )
     run_multiplayer_game_command = commands.CustomCommand(
         func=multiplayer_game.run,
         renderer=renderer,
@@ -58,10 +59,14 @@ def run(renderer, server_url):
     # move_cmd = commands.EntityMoveCommand(renderer)
     # ctrl.bind_key(pygame.K_a, move_cmd, btn1, (100, 200))
 
-    widgets.TextArea((0, 0), (100, 7), constants.COLOR_YELLOW, "siema test 123")
+    widgets.TextArea((0, 0), (100, 7), constants.COLOR_YELLOW, "test 123")
+
+    nickname_input_box = pygame_textinput.TextInput((30, 20), initial_string="nickname placeholder")
 
     renderer.enqueue_all()
     while True:
-        for event in pygame.event.get():
+        events = pygame.event.get()
+        for event in events:
             input_handler.handle(event)
+        nickname_input_box.update(events)
         renderer.update()

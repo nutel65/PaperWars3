@@ -141,7 +141,9 @@ class Renderer2D:
         clear_time = (time.time() - clear_start) * 1000
 
         filter_sort_start = time.time()
-        # Filter out redundant entities to draw .
+        # Filter out duplicate entities
+        globvar.render_request_list = list(set(globvar.render_request_list))
+        # Filter out redundant entities to draw.
         globvar.render_request_list = list(filter(self._in_render_area, globvar.render_request_list))
         # sort render_request_list to preserve proper order of rendering
         globvar.render_request_list.sort(key=lambda x: x.RENDER_PRIORITY, reverse=True)
