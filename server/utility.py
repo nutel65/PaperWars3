@@ -1,42 +1,56 @@
 import sys
 import logging
 import binascii
+import secrets
+import json
 
+from flask_socketio import join_room, leave_room
 import msgpack
 
 from server import statuscode
+from server.ws import active_users
 
 logger = logging.getLogger(__name__)
 
-
-def id_gen(prefix=""):
-    i = 1
-    while True:
-        yield f"{prefix}{i}"
-        i += 1
-
 class GameRoom():
-    game_id_gen = id_gen("G_")
     def __init__(self):
-        self.id = next(game_id_gen)
-        self.game_state = ...
-        self.assigned_clients = [None, None]
+        self.id = secrets.token_urlsafe()[:6]
+        self.game_state = None
+        self.players = []
+        self.max_players = 2
 
-    def assign_client(client_obj):
-        i = self.assigned_client.index(None)
-        self.assigned_client[i] = client_obj
-        # if both clients are online then start game
+    def assign_player(self, client_obj):
+        if len(self.players) < self.max_players:
+            self.players.append(client_obj)
+            join_room(self.id, sid=client_obj["sid"])
+            return statuscode.OK
+        return statuscode.ROOM_FULL
 
-    def start_game(self):...
+    def remove_player(self, client_obj):
+        try:
+            self.players.remove(client_obj)
+            leave_room(self.id, sid=client_obj["sid"])
+        except:
+            pass
+        return statuscode.OK
 
-class Client():
-    # client_id_gen = utility.id_gen("C_")
-    def __init__(self, socket, ip_addr):
-        # self.id = next(client_id_gen)
-        self.socket = socket
-        self.ip_addr = ip_addr
-        self.gameroom_id = None
-        self.context = None
+    def start_game(self):
+        ...
+
+    def __repr__(self):
+        return json.dumps({
+            "id": self.id,
+            "players_count": len(self.players),
+            "max_players": self.max_players,
+        })
+
+# class Client():
+#     def __init__(self, socket, ip_addr):
+#         # self.id = next(client_id_gen)
+#         self.socket = socket
+#         self.ip_addr = ip_addr
+#         self.gameroom_id = None
+#         self.context = None
 
 def validate_credentials(dbmanager, username, password):
     query_result = dbmanager.get_user_by_username(username)
@@ -48,3 +62,25 @@ def validate_credentials(dbmanager, username, password):
     if query_result[2] == 'a':
         return statuscode.ADMIN_LOGIN_OK
     return statuscode.LOGIN_OK
+
+# def logged_only(func, *args, **kwargs):
+#     def wrapper():
+#         sid = request.sid
+#         if sid in active_users:
+#             func(*args, **kwargs)
+#         else:
+#             emit(packetcode.LOGIN_RESPONSE, {'status': status}, room=sid)
+#     return wrapper
+
+# class conditional:
+#     """
+#     A conditional decorator utility.
+#     """
+#     def __init__(self, decorator, condition):
+#         self.decorator = decorator
+#         self.condition = condition
+
+#     def __call__(self, func):
+#         if not self.condition:
+#             return func
+#         return self.decorator(func)

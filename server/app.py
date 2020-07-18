@@ -29,6 +29,8 @@ socketio = SocketIO(app, logger=True)
 dbmanager = threadwork.DBManager()
 dbmanager.start()
 
+rooms = []
+
 from server import ws
 
 @app.route('/home')
