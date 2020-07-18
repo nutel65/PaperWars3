@@ -20,6 +20,9 @@ def connect(server_url):
     for i in range(attempts):
         logger.info(f"Connecting to the server... (attempt {i + 1}/3)")
         try:
+            if sio.connected:
+                logger.info("Failed to connect - already connected")
+                return
             sio.connect(server_url)
             break
         except ConnectionError as e:

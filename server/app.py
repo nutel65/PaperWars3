@@ -17,10 +17,10 @@ from server import utility
 from server import threadwork
 
 # cd server
-# $env:FLASK_APP = "server/server.py"
+# $env:FLASK_APP = "server/app.py"
 # $env:FLASK_ENV = "development"
 # $env:FLASK_SECRET_KEY = "test_key"
-# flask run --host=0.0.0.0 --port=80
+# flask run --host=0.0.0.0 --port=5000
 
 
 app = Flask(__name__)
@@ -28,6 +28,8 @@ socketio = SocketIO(app, logger=True)
 
 dbmanager = threadwork.DBManager()
 dbmanager.start()
+
+rooms = []
 
 from server import ws
 
@@ -37,18 +39,11 @@ def index():
     return '''
         <html><body>
         <h2>PaperWars</h2>
-        Gra jest wciąż rozwijana.
+        Gra jest wciąż rozwijana, aktualnie w fazie pre-alpha.<br>
         Postępy można śledzić w <a href="https://github.com/nutel65/PaperWars3">
         repozytorium na GitHubie</a><br>
-        
-        <h3>Na czym ma polegać gra:</h3>
-        Gra turowa, planszowa, przypominająca szachy, ale bardziej rozbudowana:<br>
-        - rozbudowane mechaniki poruszania i atakowania figur<br>
-        - rekrutacja figur za walutę w grze<br>
-        - umiejętności specjalne i pasywne unikalne dla każdej figury<br>
-        - biomy modyfikujące zdolności figur i dające bonusy<br>
-        - ulepszenia figur za walutę w grze<br>
-        <a href="https://docs.google.com/document/d/1HABBGNc6HAreJJlkUUxIOtXmcVgq0Qq_RluzGqmxy9s/edit?usp=sharing">Więcej szczegółów</a><br>
+  
+        <a href="https://docs.google.com/document/d/1HABBGNc6HAreJJlkUUxIOtXmcVgq0Qq_RluzGqmxy9s/edit?usp=sharing">Szczegóły dot. zasad i przebiegu gry</a><br>
         </body></html>
         '''
 
