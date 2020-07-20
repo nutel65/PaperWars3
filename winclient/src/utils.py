@@ -88,19 +88,20 @@ def tile(tile_x, tile_y):
     return (tile_x * ts, tile_y * ts)
 
 
-def translate_to_screen_rect(rect, camera, display_rect=None):
-        """Returns screen position (in form of pygame.Rect) for entity to be rendered to."""
-        if not display_rect:
-            display_rect = pygame.Rect(0, 0, 0, 0)
-        zoom = camera.get_zoom()
-        screen_x = (rect.topleft[0] * zoom) - camera.rect.topleft[0] + display_rect.x
-        screen_y = (rect.topleft[1] * zoom) - camera.rect.topleft[1] + display_rect.y
-        
-        width, height = rect.size
-        return scale_rect(pygame.Rect(screen_x, screen_y, width, height), zoom)
+def translate_to_screen_rect(rect_global, camera, display_rect=None):
+    """Returns screen position (in form of pygame.Rect) for sprite to be rendered to."""
+    rect = rect_global
+    if not display_rect:
+        display_rect = pygame.Rect(0, 0, 0, 0)
+    zoom = camera.get_zoom()
+    screen_x = (rect.topleft[0] * zoom) - camera.rect.topleft[0] + display_rect.x
+    screen_y = (rect.topleft[1] * zoom) - camera.rect.topleft[1] + display_rect.y
+    
+    width, height = rect.size
+    return scale_rect(pygame.Rect(screen_x, screen_y, width, height), zoom)
 
 
-def entity_at_pos(pos):
-    for ent in globvar.entities:
-        if ent.get_pos() == pos:
+def sprite_at_pos(pos):
+    for ent in globvar.sprites:
+        if ent.rect.topleft == pos:
             return ent

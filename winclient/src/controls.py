@@ -7,7 +7,7 @@ import globvar
 from src import commands
 from src import utils
 from src import constants
-from src import widgets
+# from src import widgets
 
 logger = logging.getLogger(__name__)
 
@@ -71,11 +71,12 @@ class InputHandler():
         glob_pos = None
         # left click
         if event.button == 1:
-            clicked_widget = widgets.get_widget_at(screen_pos)
-            if clicked_widget:
-                logger.debug(f"clicked widget {clicked_widget}")
-                clicked_widget.on_click()
-                return
+            ...
+            # clicked_widget = widgets.get_widget_at(screen_pos)
+            # if clicked_widget:
+            #     logger.debug(f"clicked widget {clicked_widget}")
+            #     clicked_widget.on_click()
+            #     return
 
         if globvar.scene == constants.MULTIPLAYER_GAME_SCENE:
             glob_pos = utils.local_to_global(self.renderer, screen_pos)
@@ -83,7 +84,7 @@ class InputHandler():
 
             # in-game left click
             if event.button == 1:
-                # get_entity_at(glob_pos)
+                # get_sprite_at(glob_pos)
                 ...
 
             # in-game right click

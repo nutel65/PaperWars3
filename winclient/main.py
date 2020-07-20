@@ -23,3 +23,6 @@ if __name__ == "__main__":
     # multiplayer_game.run(renderer, constants.PRODUCTION_SERVER_URL)
     # main_menu.run(renderer, constants.PRODUCTION_SERVER_URL)
     main_menu.run(renderer, constants.LOCAL_SERVER_URL)
+
+# TOOO: https://www.pygame.org/docs/tut/MakeGames.html
+# TODO: https://www.pygame.org/docs/tut/DisplayModes.html

@@ -23,7 +23,7 @@ class Camera2D():
         x, y = dest_px
         self.rect.topleft = dest_px
         self.tilemap_rect.topleft = (-x, -y)
-        self.renderer.update_all()
+        self.renderer.redraw_all()
 
     def set_center(self, new_center=None):
         """Set a desired new global position (of map) as the center of the camera view."""
@@ -36,7 +36,7 @@ class Camera2D():
         shift_y = map_center[1] - display_center[1]
         x, y = self.rect.topleft
         self.set_topleft((x + shift_x, y + shift_y))
-        rdr.update_all()
+        rdr.redraw_all()
 
     def _set_zoom_id(self, zoom_id):
         """Set camera's zoom value (and recalculate rects)."""

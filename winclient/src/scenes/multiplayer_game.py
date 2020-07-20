@@ -8,7 +8,7 @@ import assets
 import globvar
 from src import commands
 from src import controls
-from src import entities
+from src import sprites
 from src import constants
 from src import network
 from src.utils import tile
@@ -26,24 +26,26 @@ def run(renderer, server_url):
     # idk man
     # TODO: show loading screen or sth
     network_service.join()
+    if not globvar.connected:
+        logger.info("Connection error: server not responding.")
+        return -1
     network.log_in(username=f"guest_{secrets.token_urlsafe()[:6]}", password="")
 
     input_handler = controls.InputHandler(renderer)
     renderer._redraw_tilemap()
 
-    ent1 = entities.Soldier(tile(1, 1), image=assets.SPRITES["green_square"])
-    ent2 = entities.Soldier(tile(2, 5), image=assets.SPRITES["blue_square"])
-    renderer.enqueue_all()
+    ent1 = sprites.Soldier(tile(1, 1), image=assets.SPRITES["green_square"])
+    ent2 = sprites.Soldier(tile(2, 5), image=assets.SPRITES["blue_square"])
 
-    # add controller for first entity
+    # add controller for first sprite
     ctrl = controls.KeyboardController()
-    move_cmd = commands.EntityMoveCommand(renderer)
+    move_cmd = commands.SpriteMoveCommand(renderer)
     ctrl.bind_key(pygame.K_a, move_cmd, ent1, tile(1, 1))
     ctrl.bind_key(pygame.K_s, move_cmd, ent1, tile(5, 5))
     ctrl.bind_key(pygame.K_d, move_cmd, ent1, tile(10, 10))
     ctrl.bind_key(pygame.K_f, move_cmd, ent1, tile(15, 15))
 
-    attack_cmd = commands.EntityAttackCommand(renderer)
+    attack_cmd = commands.SpriteAttackCommand(renderer)
     ctrl.bind_key(pygame.K_x, attack_cmd, ent1, ent2)
 
     input_handler.attach_controller(ctrl)
@@ -52,3 +54,4 @@ def run(renderer, server_url):
         for event in pygame.event.get():
             input_handler.handle(event)
         renderer.update()
+    return 0

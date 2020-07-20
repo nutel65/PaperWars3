@@ -5,7 +5,7 @@ import logging
 import pygame
 
 from src import utils
-# from src import entities
+# from src import sprites
 
 logger = logging.getLogger(__name__)
 
@@ -28,15 +28,15 @@ class CustomCommand(Command):
         return self.func(*self.args, *args2, **self.kwargs, **kwargs2)
 
 
-class EntityMoveCommand(Command):
-    """Moves entity to destination px."""
+class SpriteMoveCommand(Command):
+    """Moves sprite to destination px."""
     def execute(self, ent, dest_px):
         # TODO: prevent moving outside the map
-        ent.set_pos(dest_px[0], dest_px[1])
+        ent.update(pos=(dest_px[0], dest_px[1]))
 
 
-class EntityAttackCommand(Command):
-    """Causes entity to attack other entity."""
+class SpriteAttackCommand(Command):
+    """Causes sprite to attack other sprite."""
     def execute(self, ent, dest_ent):
         ent.attack(dest_ent)
 

@@ -23,7 +23,7 @@ psycopg2 >= 2.8.5
 # C:\Users\User\Documents\PYTHON\PaperWars3\winclient\engine\render.py: 2
 # C:\Users\User\Documents\PYTHON\PaperWars3\winclient\main.py: 5
 # C:\Users\User\Documents\PYTHON\PaperWars3\winclient\src\controls.py: 2
-# C:\Users\User\Documents\PYTHON\PaperWars3\winclient\src\entities.py: 5
+# C:\Users\User\Documents\PYTHON\PaperWars3\winclient\src\sprites.py: 5
 # C:\Users\User\Documents\PYTHON\PaperWars3\winclient\src\utils.py: 11
 pygame >= 1.9.6
 

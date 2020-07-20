@@ -6,6 +6,7 @@ import logging
 
 import socketio
 
+import globvar
 from src.network import sio
 sys.path.insert(1, os.path.join(sys.path[0], '..'))
 from server import statuscode
@@ -17,19 +18,21 @@ logger = logging.getLogger(__name__)
 @sio.event
 def connect():
     logger.info('Connection established.')
+    globvar.connected = True
     # TODO: show prompt to log in
 
 
 @sio.event
 def disconnect():
     logger.info('Disconnected from the server.')
+    globvar.connected = False
 
 
 @sio.on(packetcode.LOGIN_RESPONSE)
 def login_response(data):
     status = data["status"]
     logger.debug(f'login response received with {data}')
-    if status == statuscode.LOGIN_OK or status == statuscode.ADMIN_LOGIN_OK:
+    if status == statuscode.LOGIN_OK or status == statuscode.ADMIN_LOGIN_OK or statuscode.GUEST_LOGIN_OK:
         logger.info("SERVER: Successfully logged in.")
     elif status == statuscode.NO_SUCH_USER:
         logger.info("SERVER: No such user in database")
