@@ -33,12 +33,17 @@ def on_login(data):
     password = data.get('password')
     sid = request.sid
     
-    status = utility.validate_credentials(dbmanager, username, password)
+    if username.startswith("guest"):
+        status = statuscode.GUEST_LOGIN_OK
+    else:
+        status = utility.validate_credentials(dbmanager, username, password)
     
     if status == statuscode.LOGIN_OK or statuscode.ADMIN_LOGIN_OK:
         privilege = None
         if status == statuscode.ADMIN_LOGIN_OK:
             privilege = 'a'
+        elif status == statuscode.GUEST_LOGIN_OK:
+            privilege = 'g'
         else:
             privilege = 'u'
         logged_in_users[sid] = {

@@ -1,5 +1,6 @@
 import logging
 import threading
+import secrets
 
 import pygame
 
@@ -25,7 +26,7 @@ def run(renderer, server_url):
     # idk man
     # TODO: show loading screen or sth
     network_service.join()
-    network.log_in(username="rafix", password="rafix")
+    network.log_in(username=f"guest_{secrets.token_urlsafe()[:6]}", password="")
 
     input_handler = controls.InputHandler(renderer)
     renderer._redraw_tilemap()
